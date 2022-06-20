@@ -21,7 +21,7 @@ npx update-browserslist-db@latest
 
 ## Why You Need to Call it Regularly
 
-`npx update-browserslist-db` updates `caniuse-lite` version
+`npx update-browserslist-db@latest` updates `caniuse-lite` version
 in your npm, yarn or pnpm lock file.
 
 This update will bring data about new browsers to polyfills tools
