@@ -13,6 +13,11 @@ from `caniuse-lite`.
 npx update-browserslist-db
 ```
 
+<a href="https://evilmartians.com/?utm_source=update-browserslist-db">
+  <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
+       alt="Sponsored by Evil Martians" width="236" height="54">
+</a>
+
 
 ## Why You Need to Call it Regularly
 
