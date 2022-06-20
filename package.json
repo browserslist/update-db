@@ -1,0 +1,84 @@
+{
+  "name": "update-browserslist-db",
+  "version": "0.0.0",
+  "description": "Small CLI tool to update caniuse-lite to update target browsers from Browserslist config",
+  "keywords": [
+    "caniuse",
+    "browsers",
+    "target"
+  ],
+  "funding": [
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/browserslist"
+    },
+    {
+      "type": "tidelift",
+      "url": "https://tidelift.com/funding/github/npm/browserslist"
+    }
+  ],
+  "author": "Andrey Sitnik <andrey@sitnik.ru>",
+  "license": "MIT",
+  "repository": "browserslist/update-db",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "test": "c8 pnpm unit && eslint .",
+    "unit": "NODE_ENV=test uvu test .test.js"
+  },
+  "dependencies": {
+    "escalade": "^3.1.1",
+    "picocolors": "^1.0.0"
+  },
+  "bin": {
+    "browserslist-lint": "cli.js"
+  },
+  "devDependencies": {
+    "@logux/eslint-config": "^47.2.0",
+    "c8": "^7.11.3",
+    "clean-publish": "^4.0.1",
+    "cross-spawn": "^7.0.3",
+    "eslint": "^8.17.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-es5": "^1.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.3",
+    "eslint-plugin-prefer-let": "^3.0.1",
+    "eslint-plugin-promise": "^6.0.0",
+    "fs-extra": "^10.1.0",
+    "nanoid": "^3.3.4",
+    "nanospy": "^0.5.0",
+    "uvu": "^0.5.3"
+  },
+  "clean-publish": {
+    "cleanDocs": true
+  },
+  "c8": {
+    "exclude": [
+      "**/*.test.*"
+    ],
+    "lines": 100,
+    "reporter": "lcov",
+    "check-coverage": true
+  },
+  "size-limit": [
+    {
+      "path": "index.js",
+      "limit": "16 KB"
+    }
+  ],
+  "eslintConfig": {
+    "extends": "@logux/eslint-config"
+  },
+  "prettier": {
+    "arrowParens": "avoid",
+    "jsxSingleQuote": false,
+    "quoteProps": "consistent",
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "none"
+  }
+}

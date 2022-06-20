@@ -1,0 +1,28 @@
+name: Test
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+jobs:
+  full:
+    name: Node.js Latest Full
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Run tests
+        run: pnpm test
+        env:
+          FORCE_COLOR: 2
