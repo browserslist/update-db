@@ -24,6 +24,8 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run tests
         run: pnpm test
+        env:
+          FORCE_COLOR: 2
       - name: Run CLI
         run: ./cli.js
         env:

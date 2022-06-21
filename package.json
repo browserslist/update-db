@@ -69,7 +69,15 @@
     }
   ],
   "eslintConfig": {
-    "extends": "@logux/eslint-config"
+    "extends": "@logux/eslint-config",
+    "overrides": [
+      {
+        "files": "*.test.js",
+        "rules": {
+          "no-control-regex": "off"
+        }
+      }
+    ]
   },
   "prettier": {
     "arrowParens": "avoid",

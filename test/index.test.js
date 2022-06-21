@@ -1,5 +1,3 @@
-process.env.NO_COLOR = '1'
-
 let { remove, copy, readFile, ensureDir } = require('fs-extra')
 let { equal, match, throws } = require('uvu/assert')
 let { execSync } = require('child_process')
@@ -34,7 +32,7 @@ async function chdir(fixture, ...files) {
 function runUpdate() {
   let out = ''
   updateDb(str => {
-    out += str
+    out += str.replace(/\x1b\[\d+m/g, '')
   })
   return out
 }
