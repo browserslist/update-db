@@ -1,11 +1,11 @@
 process.env.NO_COLOR = '1'
 
-let { test } = require('uvu')
-let { equal, match, throws } = require('uvu/assert')
 let { remove, copy, readFile, ensureDir } = require('fs-extra')
+let { equal, match, throws } = require('uvu/assert')
 let { execSync } = require('child_process')
 let { nanoid } = require('nanoid/non-secure')
 let { tmpdir } = require('os')
+let { test } = require('uvu')
 let { join } = require('path')
 
 let updateDb = require('..')
