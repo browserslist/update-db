@@ -1,6 +1,6 @@
 /**
  * Run update and print output to terminal.
  */
-declare function updateDb(): Promise<void>
+declare function updateDb(print?: (str: string) => void): Promise<void>
 
 export = updateDb

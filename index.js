@@ -15,6 +15,10 @@ function BrowserslistUpdateError(message) {
 
 BrowserslistUpdateError.prototype = Error.prototype
 
+function defaultPrint(str) {
+  process.stdout.write(str)
+}
+
 function detectLockfile() {
   let packageDir = escalade('.', (dir, names) => {
     return names.indexOf('package.json') !== -1 ? dir : ''
@@ -268,7 +272,7 @@ function updateWith(print, cmd) {
   } /* c8 ignore end */
 }
 
-module.exports = function updateDB(print) {
+module.exports = function updateDB(print = defaultPrint) {
   let lock = detectLockfile()
   let latest = getLatestInfo(lock)
 
