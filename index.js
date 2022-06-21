@@ -73,7 +73,7 @@ function getLatestInfo(lock) {
 
 function getBrowsersList() {
   let spawn = childProcess.spawnSync('npx', ['browserslist'])
-  if (spawn.error || !spawn.stdout) return false
+  if (spawn.status !== 0) throw new Error(spawn.stderr.toString())
   return spawn.stdout
     .toString()
     .trim()
@@ -305,13 +305,6 @@ module.exports = function updateDB(print = defaultPrint) {
     } catch (e) /* c8 ignore start */ {
       browsersListRetrievalError = e
     } /* c8 ignore end */
-  }
-  if (currentBrowsersList === false) {
-    currentBrowsersList = []
-    browsersListRetrievalError = new Error(
-      'Can not run `npx browserslist`. ' +
-        'Try adding Browserslist to your dependencies.'
-    )
   }
 
   if (browsersListRetrievalError) {
