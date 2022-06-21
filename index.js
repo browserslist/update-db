@@ -15,6 +15,7 @@ function BrowserslistUpdateError(message) {
 
 BrowserslistUpdateError.prototype = Error.prototype
 
+/* c8 ignore next 3 */
 function defaultPrint(str) {
   process.stdout.write(str)
 }
