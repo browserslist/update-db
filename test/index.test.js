@@ -10,9 +10,6 @@ let { join } = require('path')
 
 let updateDb = require('..')
 
-const NODE_8 = process.version.startsWith('v8.')
-const NODE_10 = process.version.startsWith('v10.')
-
 let testDir
 test.after.each(async () => {
   process.chdir(__dirname)
@@ -233,23 +230,21 @@ test('updates caniuse-lite for yarn with workspaces', async () => {
   checkYarnLockfile(dir)
 })
 
-if (!NODE_8 && !NODE_10) {
-  test('updates caniuse-lite for yarn v2', async () => {
-    let dir = await chdir('update-yarn-v2', 'package.json', 'yarn.lock')
-    execSync('yarn set version berry')
-    match(
-      runUpdate(),
-      `Latest version:     ${caniuse.version}\n` +
-        'Updating caniuse-lite version\n' +
-        '$ yarn up -R caniuse-lite\n' +
-        'caniuse-lite has been successfully updated\n'
-    )
-    checkYarnLockfile(dir, 2)
-    execSync('yarn set version classic')
-  })
-}
+test('updates caniuse-lite for yarn v2', async () => {
+  let dir = await chdir('update-yarn-v2', 'package.json', 'yarn.lock')
+  execSync('yarn set version berry')
+  match(
+    runUpdate(),
+    `Latest version:     ${caniuse.version}\n` +
+      'Updating caniuse-lite version\n' +
+      '$ yarn up -R caniuse-lite\n' +
+      'caniuse-lite has been successfully updated\n'
+  )
+  checkYarnLockfile(dir, 2)
+  execSync('yarn set version classic')
+})
 
-if (!NODE_8 && !NODE_10 && isInstalled('pnpm')) {
+if (isInstalled('pnpm')) {
   test('updates caniuse-lite for pnpm', async () => {
     let dir = await chdir('update-pnpm', 'package.json', 'pnpm-lock.yaml')
     match(
