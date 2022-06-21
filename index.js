@@ -28,7 +28,7 @@ function detectLockfile() {
   if (!packageDir) {
     throw new BrowserslistUpdateError(
       'Cannot find package.json. ' +
-        'Is this the right directory to run `npx browserslist --update-db` in?'
+        'Is this the right directory to run `npx update-browserslist-db` in?'
     )
   }
 
@@ -72,8 +72,9 @@ function getLatestInfo(lock) {
 }
 
 function getBrowsersList() {
-  return childProcess
-    .execSync('npx browserslist')
+  let spawn = childProcess.spawnSync('npx', ['browserslist'])
+  if (spawn.error || !spawn.stdout) return false
+  return spawn.stdout
     .toString()
     .trim()
     .split('\n')
@@ -305,12 +306,19 @@ module.exports = function updateDB(print = defaultPrint) {
       browsersListRetrievalError = e
     } /* c8 ignore end */
   }
+  if (currentBrowsersList === false) {
+    currentBrowsersList = []
+    browsersListRetrievalError = new Error(
+      'Can not run `npx browserslist`. ' +
+        'Try adding Browserslist to your dependencies.'
+    )
+  }
 
   if (browsersListRetrievalError) {
     print(
       pico.red(
         '\n' +
-          browsersListRetrievalError.stack +
+          browsersListRetrievalError.message +
           '\n\n' +
           'Problem with browser list retrieval.\n' +
           'Target browser changes won’t be shown.\n'
