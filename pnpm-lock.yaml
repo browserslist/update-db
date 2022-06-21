@@ -4,9 +4,8 @@ specifiers:
   '@logux/eslint-config': ^47.2.0
   c8: ^7.11.3
   clean-publish: ^4.0.1
-  cross-spawn: ^7.0.3
   escalade: ^3.1.1
-  eslint: ^8.17.0
+  eslint: ^8.18.0
   eslint-config-standard: ^17.0.0
   eslint-plugin-es5: ^1.5.0
   eslint-plugin-import: ^2.26.0
@@ -15,7 +14,6 @@ specifiers:
   eslint-plugin-promise: ^6.0.0
   fs-extra: ^10.1.0
   nanoid: ^3.3.4
-  nanospy: ^0.5.0
   picocolors: ^1.0.0
   uvu: ^0.5.3
 
@@ -27,7 +25,6 @@ devDependencies:
   '@logux/eslint-config': 47.2.0_jtapuewgguff3gy4nccmfac7k4
   c8: 7.11.3
   clean-publish: 4.0.1
-  cross-spawn: 7.0.3
   eslint: 8.18.0
   eslint-config-standard: 17.0.0_73zqogbxxwb3ijehtqwxiag47y
   eslint-plugin-es5: 1.5.0_eslint@8.18.0
@@ -37,7 +34,6 @@ devDependencies:
   eslint-plugin-promise: 6.0.0_eslint@8.18.0
   fs-extra: 10.1.0
   nanoid: 3.3.4
-  nanospy: 0.5.0
   uvu: 0.5.3
 
 packages:
@@ -245,7 +241,7 @@ packages:
       istanbul-reports: 3.1.4
       rimraf: 3.0.2
       test-exclude: 6.0.0
-      v8-to-istanbul: 9.0.0
+      v8-to-istanbul: 9.0.1
       yargs: 16.2.0
       yargs-parser: 20.2.9
     dev: true
@@ -1192,11 +1188,6 @@ packages:
     hasBin: true
     dev: true
 
-  /nanospy/0.5.0:
-    resolution: {integrity: sha512-QxH93ntkjRiSP+gJrBLcgOO3neU6pGhUKjPAJ7rAFag/+tJ+/0lw6dXic+iXUQ/3Cxk4Dp/FwLnf57xnQsjecQ==}
-    engines: {node: ^8.0.0 || ^10.0.0 || ^12.0.0 || ^14.0.0 || >=16.0.0}
-    dev: true
-
   /natural-compare/1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
     dev: true
@@ -1568,8 +1559,8 @@ packages:
     resolution: {integrity: sha512-l8lCEmLcLYZh4nbunNZvQCJc5pv7+RCwa8q/LdUx8u7lsWvPDKmpodJAJNwkAhJC//dFY48KuIEmjtd4RViDrA==}
     dev: true
 
-  /v8-to-istanbul/9.0.0:
-    resolution: {integrity: sha512-HcvgY/xaRm7isYmyx+lFKA4uQmfUbN0J4M0nNItvzTvH/iQ9kW5j/t4YSR+Ge323/lrgDAWJoF46tzGQHwBHFw==}
+  /v8-to-istanbul/9.0.1:
+    resolution: {integrity: sha512-74Y4LqY74kLE6IFyIjPtkSTWzUZmj8tdHT9Ii/26dvQ6K9Dl2NbEfj0XgU2sHCtKgt5VupqhlO/5aWuqS+IY1w==}
     engines: {node: '>=10.12.0'}
     dependencies:
       '@jridgewell/trace-mapping': 0.3.13
