@@ -37,10 +37,6 @@ function runUpdate() {
   return out
 }
 
-function isInstalled(cmd) {
-  return execSync(`whereis ${cmd}`).toString().trim() !== `${cmd}:`
-}
-
 function checkRunUpdateContents(installedVersions, system) {
   let addCmd = system + (system === 'yarn' ? ' add -W' : ' install')
   let rmCmd = system + (system === 'yarn' ? ' remove -W' : ' uninstall')
@@ -242,20 +238,18 @@ test('updates caniuse-lite for yarn v2', async () => {
   execSync('yarn set version classic')
 })
 
-if (isInstalled('pnpm')) {
-  test('updates caniuse-lite for pnpm', async () => {
-    let dir = await chdir('update-pnpm', 'package.json', 'pnpm-lock.yaml')
-    match(
-      runUpdate(),
-      `Latest version:     ${caniuse.version}\n` +
-        'Updating caniuse-lite version\n' +
-        '$ pnpm up caniuse-lite\n' +
-        'caniuse-lite has been successfully updated\n'
-    )
+test('updates caniuse-lite for pnpm', async () => {
+  let dir = await chdir('update-pnpm', 'package.json', 'pnpm-lock.yaml')
+  match(
+    runUpdate(),
+    `Latest version:     ${caniuse.version}\n` +
+      'Updating caniuse-lite version\n' +
+      '$ pnpm up caniuse-lite\n' +
+      'caniuse-lite has been successfully updated\n'
+  )
 
-    let lock = (await readFile(join(dir, 'pnpm-lock.yaml'))).toString()
-    match(lock, `/caniuse-lite/${caniuse.version}:`)
-  })
-}
+  let lock = (await readFile(join(dir, 'pnpm-lock.yaml'))).toString()
+  match(lock, `/caniuse-lite/${caniuse.version}:`)
+})
 
 test.run()
