@@ -27,7 +27,7 @@ jobs:
         env:
           FORCE_COLOR: 2
       - name: Run CLI
-        run: ./cli.js
+        run: node cli.js
         env:
           FORCE_COLOR: 2
   short:
@@ -72,7 +72,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run CLI
-        run: ./cli.js
+        run: node cli.js
         env:
           FORCE_COLOR: 2
       - name: Run unit tests
