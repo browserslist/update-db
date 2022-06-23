@@ -82,9 +82,7 @@ function getBrowsers() {
     .toString()
     .trim()
     .split('\n')
-    .map(line => {
-      return line.trim().split(' ')
-    })
+    .map(line => line.trim().split(' '))
     .reduce((result, entry) => {
       if (!result[entry[0]]) {
         result[entry[0]] = []
@@ -96,36 +94,20 @@ function getBrowsers() {
 
 function diffBrowsers(old, current) {
   let browsers = Object.keys(old).concat(
-    Object.keys(current).filter(browser => {
-      return old[browser] === undefined
-    })
+    Object.keys(current).filter(browser => old[browser] === undefined)
   )
   return browsers
     .map(browser => {
       let oldVersions = old[browser] || []
       let currentVersions = current[browser] || []
-      let intersection = oldVersions.filter(version => {
-        return currentVersions.indexOf(version) !== -1
-      })
-      let addedVersions = currentVersions.filter(version => {
-        return intersection.indexOf(version) === -1
-      })
-      let removedVersions = oldVersions.filter(version => {
-        return intersection.indexOf(version) === -1
-      })
-      return removedVersions
-        .map(version => {
-          return pico.red('- ' + browser + ' ' + version)
-        })
-        .concat(
-          addedVersions.map(version => {
-            return pico.green('+ ' + browser + ' ' + version)
-          })
-        )
+      let common = oldVersions.filter(v => currentVersions.includes(v))
+      let added = currentVersions.filter(v => !common.includes(v))
+      let removed = oldVersions.filter(v => !common.includes(v))
+      return removed
+        .map(v => pico.red('- ' + browser + ' ' + v))
+        .concat(added.map(v => pico.green('+ ' + browser + ' ' + v)))
     })
-    .reduce((result, array) => {
-      return result.concat(array)
-    }, [])
+    .reduce((result, array) => result.concat(array), [])
     .join('\n')
 }
 
@@ -181,11 +163,7 @@ function updateYarnLockfile(lock, latest) {
       }
     }
   })
-  let content = blocks
-    .map(lines => {
-      return lines.join('\n')
-    })
-    .join('')
+  let content = blocks.map(lines => lines.join('\n')).join('')
   return { content, versions }
 }
 
