@@ -71,12 +71,12 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
-      - name: Run CLI
-        run: node cli.js
-        env:
-          FORCE_COLOR: 2
       - name: Run unit tests
         run: pnpm unit
+        env:
+          FORCE_COLOR: 2
+      - name: Run CLI
+        run: node cli.js
         env:
           FORCE_COLOR: 2
 
