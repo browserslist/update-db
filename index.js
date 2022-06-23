@@ -73,12 +73,12 @@ function getLatestInfo(lock) {
 
 function getBrowsers() {
   let spawn = childProcess.spawnSync('npx', ['browserslist'])
-  if (spawn.status !== 0) {
+  if (spawn.status !== 0 && spawn.stderr) {
     let err = new Error(spawn.stderr.toString().trim())
     err.terminal = true
     throw err
   }
-  return spawn.stdout
+  return (spawn.stdout || '')
     .toString()
     .trim()
     .split('\n')
