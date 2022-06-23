@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.4
+* Fixed browsers changes detection.
+
 ## 1.0.3
 * Added Browserslist to peer dependencies.
 
