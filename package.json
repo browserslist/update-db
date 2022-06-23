@@ -27,7 +27,7 @@
   },
   "scripts": {
     "test": "c8 pnpm unit && eslint .",
-    "unit": "NODE_ENV=test uvu test .test.js"
+    "unit": "uvu test .test.js"
   },
   "dependencies": {
     "escalade": "^3.1.1",
