@@ -71,9 +71,13 @@ function getLatestInfo(lock) {
   )
 }
 
-function getBrowsersList() {
+function getBrowsers() {
   let spawn = childProcess.spawnSync('npx', ['browserslist'])
-  if (spawn.status !== 0) throw new Error(spawn.stderr.toString().trim())
+  if (spawn.status !== 0) {
+    let err = new Error(spawn.stderr.toString().trim())
+    err.terminal = true
+    throw err
+  }
   return spawn.stdout
     .toString()
     .trim()
@@ -90,7 +94,7 @@ function getBrowsersList() {
     }, {})
 }
 
-function diffBrowsersLists(old, current) {
+function diffBrowsers(old, current) {
   let browsers = Object.keys(old).concat(
     Object.keys(current).filter(browser => {
       return old[browser] === undefined
@@ -278,12 +282,12 @@ module.exports = function updateDB(print = defaultPrint) {
   let lock = detectLockfile()
   let latest = getLatestInfo(lock)
 
-  let browsersListRetrievalError
-  let oldBrowsersList
+  let listError
+  let oldList
   try {
-    oldBrowsersList = getBrowsersList()
+    oldList = getBrowsers()
   } catch (e) {
-    browsersListRetrievalError = e
+    listError = e
   }
 
   print('Latest version:     ' + pico.bold(pico.green(latest.version)) + '\n')
@@ -298,33 +302,30 @@ module.exports = function updateDB(print = defaultPrint) {
 
   print('caniuse-lite has been successfully updated\n')
 
-  let currentBrowsersList
-  if (!browsersListRetrievalError) {
+  let newList
+  if (!listError) {
     try {
-      currentBrowsersList = getBrowsersList()
+      newList = getBrowsers()
     } catch (e) /* c8 ignore start */ {
-      browsersListRetrievalError = e
+      listError = e
     } /* c8 ignore end */
   }
 
-  if (browsersListRetrievalError) {
+  if (listError) {
     print(
       pico.red(
         '\n' +
-          browsersListRetrievalError.message +
+          (listError.terminal ? listError.message : listError.stack) +
           '\n\n' +
           'Problem with browser list retrieval.\n' +
           'Target browser changes won’t be shown.\n'
       )
     )
   } else {
-    let targetBrowserChanges = diffBrowsersLists(
-      oldBrowsersList,
-      currentBrowsersList
-    )
-    if (targetBrowserChanges) {
+    let changes = diffBrowsers(oldList, newList)
+    if (changes) {
       print('\nTarget browser changes:\n')
-      print(targetBrowserChanges + '\n')
+      print(changes + '\n')
     } else {
       print('\n' + pico.green('No target browser changes') + '\n')
     }
