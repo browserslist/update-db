@@ -15,7 +15,7 @@ specifiers:
   fs-extra: ^10.1.0
   nanoid: ^3.3.4
   picocolors: ^1.0.0
-  uvu: ^0.5.3
+  uvu: ^0.5.4
 
 dependencies:
   escalade: 3.1.1
@@ -34,7 +34,7 @@ devDependencies:
   eslint-plugin-promise: 6.0.0_eslint@8.18.0
   fs-extra: 10.1.0
   nanoid: 3.3.4
-  uvu: 0.5.3
+  uvu: 0.5.4
 
 packages:
 
@@ -1544,8 +1544,8 @@ packages:
       punycode: 2.1.1
     dev: true
 
-  /uvu/0.5.3:
-    resolution: {integrity: sha512-brFwqA3FXzilmtnIyJ+CxdkInkY/i4ErvP7uV0DnUVxQcQ55reuHphorpF+tZoVHK2MniZ/VJzI7zJQoc9T9Yw==}
+  /uvu/0.5.4:
+    resolution: {integrity: sha512-x1CyUjcP9VKaNPhjeB3FIc/jqgLsz2Q9LFhRzUTu/jnaaHILEGNuE0XckQonl8ISLcwyk9I2EZvWlYsQnwxqvQ==}
     engines: {node: '>=8'}
     hasBin: true
     dependencies:
