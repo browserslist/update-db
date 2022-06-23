@@ -72,24 +72,14 @@ function getLatestInfo(lock) {
 }
 
 function getBrowsers() {
-  let spawn = childProcess.spawnSync('npx', ['browserslist'])
-  if (spawn.status !== 0 && spawn.stderr) {
-    let err = new Error(spawn.stderr.toString().trim())
-    err.terminal = true
-    throw err
-  }
-  return (spawn.stdout || '')
-    .toString()
-    .trim()
-    .split('\n')
-    .map(line => line.trim().split(' '))
-    .reduce((result, entry) => {
-      if (!result[entry[0]]) {
-        result[entry[0]] = []
-      }
-      result[entry[0]].push(entry[1])
-      return result
-    }, {})
+  let browserslist = require('browserslist')
+  return browserslist().reduce((result, entry) => {
+    if (!result[entry[0]]) {
+      result[entry[0]] = []
+    }
+    result[entry[0]].push(entry[1])
+    return result
+  }, {})
 }
 
 function diffBrowsers(old, current) {
@@ -293,7 +283,7 @@ module.exports = function updateDB(print = defaultPrint) {
     print(
       pico.red(
         '\n' +
-          (listError.terminal ? listError.message : listError.stack) +
+          listError.stack +
           '\n\n' +
           'Problem with browser list retrieval.\n' +
           'Target browser changes won’t be shown.\n'
