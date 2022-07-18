@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.5
+* Fixed npm 6 support.
+
 ## 1.0.4
 * Fixed browsers changes detection.
 
@@ -11,7 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Fixed browsers changes detection.
 
 ## 1.0.1
-* Fixed CLI.
+* Fix
 
 ## 1.0
 * Initial release.
