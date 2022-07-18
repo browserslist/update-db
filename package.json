@@ -41,19 +41,19 @@
   },
   "devDependencies": {
     "@logux/eslint-config": "^47.2.0",
-    "browserslist": "^4.21.0",
+    "browserslist": "^4.21.2",
     "c8": "^7.11.3",
     "clean-publish": "^4.0.1",
-    "eslint": "^8.18.0",
+    "eslint": "^8.20.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-es5": "^1.5.0",
     "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-n": "^15.2.3",
+    "eslint-plugin-n": "^15.2.4",
     "eslint-plugin-prefer-let": "^3.0.1",
     "eslint-plugin-promise": "^6.0.0",
     "fs-extra": "^10.1.0",
     "nanoid": "^3.3.4",
-    "uvu": "^0.5.4"
+    "uvu": "^0.5.6"
   },
   "clean-publish": {
     "cleanDocs": true
