@@ -193,7 +193,7 @@ function updatePackageManually(print, lock, latest) {
   )
   fs.writeFileSync(lock.file, lockfileData.content)
 
-  let install = lock.mode === 'yarn' ? 'yarn add -W' : lock.mode + ' install'
+  let install = lock.mode === 'yarn' ? 'yarn add --ignore-scripts -W' : lock.mode + ' install'
   print(
     'Installing new caniuse-lite version\n' +
       pico.yellow('$ ' + install + ' caniuse-lite') +
