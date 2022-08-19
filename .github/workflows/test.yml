@@ -4,6 +4,8 @@ on:
     branches:
       - main
   pull_request:
+env:
+  FORCE_COLOR: 2
 jobs:
   full:
     name: Node.js Latest Full
@@ -24,12 +26,8 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run tests
         run: pnpm test
-        env:
-          FORCE_COLOR: 2
       - name: Run CLI
         run: node cli.js
-        env:
-          FORCE_COLOR: 2
   short:
     runs-on: ubuntu-latest
     strategy:
