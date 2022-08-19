@@ -41,10 +41,10 @@
   },
   "devDependencies": {
     "@logux/eslint-config": "^47.2.0",
-    "browserslist": "^4.21.2",
-    "c8": "^7.11.3",
+    "browserslist": "^4.21.3",
+    "c8": "^7.12.0",
     "clean-publish": "^4.0.1",
-    "eslint": "^8.20.0",
+    "eslint": "^8.22.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-es5": "^1.5.0",
     "eslint-plugin-import": "^2.26.0",
