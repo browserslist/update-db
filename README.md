@@ -1,7 +1,7 @@
 # Update Browserslist DB
 
-<img width="120" height="120" alt="Browserslist logo by Anton Lovchikov"
-     src="https://browserslist.github.io/browserslist/logo.svg" align="right">
+<img width="120" height="120" alt="Browserslist logo by Anton Popov"
+     src="https://browsersl.ist/logo.svg" align="right">
 
 CLI tool to update `caniuse-lite` with browsers DB
 from [Browserslist](https://github.com/browserslist/browserslist/) config.
