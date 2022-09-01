@@ -116,8 +116,7 @@ function diffBrowsers(old, current) {
 function updateNpmLockfile(lock, latest) {
   let metadata = { latest, versions: [] }
   let content = deletePackage(JSON.parse(lock.content), metadata)
-  let indent = detectIndent(lock.content)
-  metadata.content = JSON.stringify(content, null, indent)
+  metadata.content = JSON.stringify(content, null, detectIndent(lock.content))
   return metadata
 }
 
