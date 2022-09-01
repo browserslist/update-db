@@ -4,7 +4,16 @@ let pico = require('picocolors')
 let path = require('path')
 let fs = require('fs')
 
-let detectIndent = require('./detect-indent')
+const DEFAULT_INDENT = '  '
+const INDENT_REGEXP = /^(\s*)[^\s]/m
+
+function detectIndent(text) {
+  try {
+    return INDENT_REGEXP.exec(text)[1] || DEFAULT_INDENT
+  } catch (e) {
+    return DEFAULT_INDENT
+  }
+}
 
 function BrowserslistUpdateError(message) {
   this.name = 'BrowserslistUpdateError'
