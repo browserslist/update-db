@@ -30,7 +30,6 @@
     "unit": "uvu test .test.js"
   },
   "dependencies": {
-    "detect-indent": "^6.1.0",
     "escalade": "^3.1.1",
     "picocolors": "^1.0.0"
   },
