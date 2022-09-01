@@ -11,6 +11,7 @@ function detectIndent(text) {
   try {
     return INDENT_REGEXP.exec(text)[1] || DEFAULT_INDENT
   } catch (e) {
+    /* c8 ignore next 2 */
     return DEFAULT_INDENT
   }
 }
