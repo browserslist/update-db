@@ -1,4 +1,5 @@
 let childProcess = require('child_process')
+let detectIndent = require('detect-indent')
 let escalade = require('escalade/sync')
 let pico = require('picocolors')
 let path = require('path')
@@ -104,7 +105,8 @@ function diffBrowsers(old, current) {
 function updateNpmLockfile(lock, latest) {
   let metadata = { latest, versions: [] }
   let content = deletePackage(JSON.parse(lock.content), metadata)
-  metadata.content = JSON.stringify(content, null, '  ')
+  let indent = detectIndent(lock.content).indent || '  '
+  metadata.content = JSON.stringify(content, null, indent)
   return metadata
 }
 
