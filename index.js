@@ -4,6 +4,8 @@ let pico = require('picocolors')
 let path = require('path')
 let fs = require('fs')
 
+let detectIndent = require('./detect-indent')
+
 function BrowserslistUpdateError(message) {
   this.name = 'BrowserslistUpdateError'
   this.message = message
@@ -104,7 +106,8 @@ function diffBrowsers(old, current) {
 function updateNpmLockfile(lock, latest) {
   let metadata = { latest, versions: [] }
   let content = deletePackage(JSON.parse(lock.content), metadata)
-  metadata.content = JSON.stringify(content, null, '  ')
+  let indent = detectIndent(lock.content)
+  metadata.content = JSON.stringify(content, null, indent)
   return metadata
 }
 
