@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.7
+* Fixed indent detection.
+
 ## 1.0.6
 * Fixed indent changes for npm 6 (by Alexander Anchishkin).
 
