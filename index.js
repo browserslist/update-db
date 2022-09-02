@@ -5,7 +5,7 @@ let path = require('path')
 let fs = require('fs')
 
 const DEFAULT_INDENT = '  '
-const INDENT_REGEXP = /^(\s*)[^\s]/m
+const INDENT_REGEXP = /^(\s+)[^\s]/m
 
 function detectIndent(text) {
   try {
