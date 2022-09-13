@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.9
+* Fixed EOL detection (by Maxim Mazurok).
+
 ## 1.0.8
 * Fixed indent detection on Windows (by Maxim Mazurok).
 
