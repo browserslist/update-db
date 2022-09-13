@@ -169,7 +169,7 @@ function updateLockfile(lock, latest) {
     updatedLockFile = updateNpmLockfile(lock, latest)
   }
   updatedLockFile.content = updatedLockFile.content.replace(
-    '\n',
+    /\n/g,
     detectEOL(lock.content)
   )
   return updatedLockFile
