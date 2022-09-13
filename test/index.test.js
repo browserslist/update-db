@@ -1,5 +1,5 @@
 let { remove, copy, readFile, ensureDir } = require('fs-extra')
-let { equal, match, throws } = require('uvu/assert')
+let { equal, match, throws, not } = require('uvu/assert')
 let { execSync } = require('child_process')
 let { nanoid } = require('nanoid/non-secure')
 let { tmpdir } = require('os')
@@ -153,6 +153,18 @@ test('updates caniuse-lite for npm', async () => {
 
   let lock = JSON.parse(await readFile(join(dir, 'package-lock.json')))
   equal(lock.dependencies['caniuse-lite'].version, caniuse.version)
+})
+
+test('keeps existing EOL', async () => {
+  let dir = await chdir('update-npm-crlf', 'package.json', 'package-lock.json')
+  runUpdate()
+
+  let lock = await readFile(join(dir, 'package-lock.json'), 'utf-8')
+  let allLineBreaks = lock.match(/(\r\n|\r|\n)/g).length
+  let CRLFs = lock.match(/\r\n/g).length
+  not.equal(CRLFs, 0)
+  not.equal(allLineBreaks, 0)
+  equal(allLineBreaks, CRLFs)
 })
 
 test('skips the npm update if caniuse-lite is up to date', async () => {

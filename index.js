@@ -4,7 +4,7 @@ let pico = require('picocolors')
 let path = require('path')
 let fs = require('fs')
 
-const { detectIndent } = require('./utils')
+const { detectIndent, detectEOL } = require('./utils')
 
 function BrowserslistUpdateError(message) {
   this.name = 'BrowserslistUpdateError'
@@ -162,11 +162,17 @@ function updateYarnLockfile(lock, latest) {
 function updateLockfile(lock, latest) {
   if (!lock.content) lock.content = fs.readFileSync(lock.file).toString()
 
+  let updatedLockFile
   if (lock.mode === 'yarn') {
-    return updateYarnLockfile(lock, latest)
+    updatedLockFile = updateYarnLockfile(lock, latest)
   } else {
-    return updateNpmLockfile(lock, latest)
+    updatedLockFile = updateNpmLockfile(lock, latest)
   }
+  updatedLockFile.content = updatedLockFile.content.replace(
+    /\n/g,
+    detectEOL(lock.content)
+  )
+  return updatedLockFile
 }
 
 function updatePackageManually(print, lock, latest) {
