@@ -1,11 +1,16 @@
 let { suite } = require('uvu')
 let { equal } = require('uvu/assert')
 
-const { detectIndent, DEFAULT_INDENT } = require('../utils')
+const {
+  detectIndent,
+  DEFAULT_INDENT,
+  detectEOL,
+  DEFAULT_EOL
+} = require('../utils')
 
 const detectIndentSuite = suite('detectIndent')
 
-const lineEndings = ['\n', '\r\n']
+const lineEndings = ['\n', '\r', '\r\n']
 const indentationStyles = ['  ', '    ', '\t']
 
 lineEndings.forEach(lineEnding =>
@@ -14,14 +19,13 @@ lineEndings.forEach(lineEnding =>
       `should detect correctly for ${JSON.stringify(
         lineEnding
       )} EOL and ${JSON.stringify(indentationStyle)} indentation style`,
-      () => {
+      () =>
         equal(
           detectIndent(
             `{${lineEnding}${indentationStyle}"name": "my-project"${lineEnding}}`
           ),
           indentationStyle
         )
-      }
     )
   )
 )
@@ -34,3 +38,25 @@ detectIndentSuite(
 )
 
 detectIndentSuite.run()
+
+const detectEOLSuite = suite('detectEOL')
+
+lineEndings.forEach(lineEnding =>
+  detectEOLSuite(
+    `should detect line ending ${JSON.stringify(lineEnding)} correctly`,
+    () =>
+      equal(
+        detectEOL(`{${lineEnding}  "name": "my-project"${lineEnding}}`),
+        lineEnding
+      )
+  )
+)
+
+detectIndentSuite(
+  `should return ${JSON.stringify(DEFAULT_EOL)} when regex fails`,
+  () => {
+    equal(detectIndent('{"no":"eol"}'), DEFAULT_EOL)
+  }
+)
+
+detectEOLSuite.run()

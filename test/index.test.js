@@ -155,6 +155,14 @@ test('updates caniuse-lite for npm', async () => {
   equal(lock.dependencies['caniuse-lite'].version, caniuse.version)
 })
 
+test('keeps existing EOL', async () => {
+  let dir = await chdir('update-npm-crlf', 'package.json', 'package-lock.json')
+  runUpdate()
+
+  let lock = await readFile(join(dir, 'package-lock.json'))
+  equal(lock.includes('\r\n'), true)
+})
+
 test('skips the npm update if caniuse-lite is up to date', async () => {
   let dir = await chdir('update-npm', 'package.json', 'package-lock.json')
   checkRunUpdateContents('1.0.30001030', 'npm')
