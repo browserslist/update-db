@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.10
+* Fixed pnpm support (by Joris Masson).
+
 ## 1.0.9
 * Fixed EOL detection (by Maxim Mazurok).
 
