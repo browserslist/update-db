@@ -1,5 +1,5 @@
 let { remove, copy, readFile, ensureDir } = require('fs-extra')
-let { equal, match, throws } = require('uvu/assert')
+let { equal, match, throws, ok } = require('uvu/assert')
 let { execSync } = require('child_process')
 let { nanoid } = require('nanoid/non-secure')
 let { tmpdir } = require('os')
@@ -249,7 +249,10 @@ test('updates caniuse-lite for pnpm', async () => {
   )
 
   let lock = (await readFile(join(dir, 'pnpm-lock.yaml'))).toString()
-  match(lock, `/caniuse-lite/${caniuse.version}:`)
+  ok(
+    lock.includes(`/caniuse-lite/${caniuse.version}:`) ||
+      lock.includes(`/caniuse-lite@${caniuse.version}:`)
+  )
 })
 
 test.run()
