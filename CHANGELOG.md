@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.11
+* Fixed npm lockfile 3 support.
+
 ## 1.0.10
 * Fixed pnpm support (by Joris Masson).
 
