@@ -40,9 +40,7 @@
   "peerDependencies": {
     "browserslist": ">= 4.21.0"
   },
-  "bin": {
-    "browserslist-lint": "cli.js"
-  },
+  "bin": "cli.js",
   "devDependencies": {
     "@logux/eslint-config": "^49.0.0",
     "browserslist": "^4.21.5",
