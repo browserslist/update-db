@@ -121,6 +121,14 @@ function deletePackage(node, metadata) {
       node.dependencies[i] = deletePackage(node.dependencies[i], metadata)
     }
   }
+  if (node.packages) {
+    for (let path in node.packages) {
+      if (path.endsWith('/caniuse-lite')) {
+        metadata.versions[node.packages[path].version] = true
+        delete node.packages[path]
+      }
+    }
+  }
   return node
 }
 
