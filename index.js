@@ -181,7 +181,7 @@ function updatePackageManually(print, lock, latest) {
   if (caniuseVersions.length === 1 && caniuseVersions[0] === latest.version) {
     print(
       'Installed version:  ' +
-        pico.bold(pico.green(latest.version)) +
+        pico.bold(pico.green(caniuseVersions[0])) +
         '\n' +
         pico.bold(pico.green('caniuse-lite is up to date')) +
         '\n'
