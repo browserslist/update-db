@@ -16,11 +16,11 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: latest
+          version: 8
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 19
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
@@ -33,6 +33,7 @@ jobs:
     strategy:
       matrix:
         node-version:
+          - 18
           - 16
           - 14
     name: Node.js ${{ matrix.node-version }} Quick
@@ -42,7 +43,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: latest
+          version: 8
       - name: Install Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
@@ -50,5 +51,24 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Run unit tests
+        run: pnpm unit
+  old:
+    runs-on: ubuntu-latest
+    name: Node.js 14 Quick
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7
+      - name: Install Node.js 14
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --ignore-scripts
       - name: Run unit tests
         run: pnpm unit
