@@ -243,7 +243,11 @@ function updatePackageManually(print, lock, latest) {
 }
 
 function updateWith(print, cmd) {
-  print('Updating caniuse-lite version\n' + pico.yellow('$ ' + cmd) + '\n')
+  print(
+    'Updating caniuse-lite version\n' +
+      pico.yellow('$ ' + cmd.replace('yarnpkg', 'yarn')) +
+      '\n'
+  )
   try {
     execSync(cmd)
   } catch (e) /* c8 ignore start */ {
