@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.12
+* Fixed yarn support when system has Hadoop CLI.
+
 ## 1.0.11
 * Fixed npm lockfile 3 support.
 
