@@ -1,10 +1,10 @@
-let { writeFileSync, readFileSync, existsSync } = require('fs')
+let { existsSync, readFileSync, writeFileSync } = require('fs')
 let { execSync } = require('child_process')
 let { join } = require('path')
 let escalade = require('escalade/sync')
 let pico = require('picocolors')
 
-const { detectIndent, detectEOL } = require('./utils')
+const { detectEOL, detectIndent } = require('./utils')
 
 function BrowserslistUpdateError(message) {
   this.name = 'BrowserslistUpdateError'
@@ -40,16 +40,16 @@ function detectLockfile() {
   let lockfilePnpm = join(packageDir, 'pnpm-lock.yaml')
 
   if (existsSync(lockfilePnpm)) {
-    return { mode: 'pnpm', file: lockfilePnpm }
+    return { file: lockfilePnpm, mode: 'pnpm' }
   } else if (existsSync(lockfileNpm)) {
-    return { mode: 'npm', file: lockfileNpm }
+    return { file: lockfileNpm, mode: 'npm' }
   } else if (existsSync(lockfileYarn)) {
-    let lock = { mode: 'yarn', file: lockfileYarn }
+    let lock = { file: lockfileYarn, mode: 'yarn' }
     lock.content = readFileSync(lock.file).toString()
     lock.version = /# yarn lockfile v1/.test(lock.content) ? 1 : 2
     return lock
   } else if (existsSync(lockfileShrinkwrap)) {
-    return { mode: 'npm', file: lockfileShrinkwrap }
+    return { file: lockfileShrinkwrap, mode: 'npm' }
   }
   throw new BrowserslistUpdateError(
     'No lockfile found. Run "npm install", "yarn install" or "pnpm install"'

@@ -42,15 +42,17 @@
   },
   "bin": "cli.js",
   "devDependencies": {
-    "@logux/eslint-config": "^49.0.0",
-    "browserslist": "^4.21.5",
-    "c8": "^7.13.0",
+    "@logux/eslint-config": "^52.0.1",
+    "browserslist": "^4.21.10",
+    "c8": "^8.0.1",
     "clean-publish": "^4.2.0",
-    "eslint": "^8.38.0",
-    "eslint-config-standard": "^17.0.0",
+    "eslint": "^8.49.0",
+    "eslint-config-standard": "^17.1.0",
     "eslint-plugin-es5": "^1.5.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-n": "^15.7.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-n": "^16.1.0",
+    "eslint-plugin-node-imports": "^1.0.2",
+    "eslint-plugin-perfectionist": "^2.1.0",
     "eslint-plugin-prefer-let": "^3.0.1",
     "eslint-plugin-promise": "^6.1.1",
     "fs-extra": "^11.1.1",
@@ -77,6 +79,7 @@
   "eslintConfig": {
     "extends": "@logux/eslint-config",
     "rules": {
+      "node-import/prefer-node-protocol": "off",
       "n/global-require": "off"
     },
     "overrides": [

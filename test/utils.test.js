@@ -2,10 +2,10 @@ let { suite } = require('uvu')
 let { equal } = require('uvu/assert')
 
 const {
-  detectIndent,
+  DEFAULT_EOL,
   DEFAULT_INDENT,
   detectEOL,
-  DEFAULT_EOL
+  detectIndent
 } = require('../utils')
 
 const detectIndentSuite = suite('detectIndent')

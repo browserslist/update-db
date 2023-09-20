@@ -1,5 +1,5 @@
-let { remove, copy, readFile, ensureDir } = require('fs-extra')
-let { equal, match, throws, ok } = require('uvu/assert')
+let { copy, ensureDir, readFile, remove } = require('fs-extra')
+let { equal, match, ok, throws } = require('uvu/assert')
 let { execSync } = require('child_process')
 let { nanoid } = require('nanoid/non-secure')
 let { tmpdir } = require('os')
