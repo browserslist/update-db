@@ -212,7 +212,7 @@ function updatePackageManually(print, lock, latest) {
   let install = lock.mode === 'yarn' ? 'yarnpkg add -W' : lock.mode + ' install'
   print(
     'Installing new caniuse-lite version\n' +
-      pico.yellow('$ ' + install + ' caniuse-lite') +
+      pico.yellow('$ ' + install.replace('yarnpkg', 'yarn') + ' caniuse-lite') +
       '\n'
   )
   try {
@@ -236,7 +236,7 @@ function updatePackageManually(print, lock, latest) {
     lock.mode === 'yarn' ? 'yarnpkg remove -W' : lock.mode + ' uninstall'
   print(
     'Cleaning package.json dependencies from caniuse-lite\n' +
-      pico.yellow('$ ' + del + ' caniuse-lite') +
+      pico.yellow('$ ' + del.replace('yarnpkg', 'yarn') + ' caniuse-lite') +
       '\n'
   )
   execSync(del + ' caniuse-lite')
