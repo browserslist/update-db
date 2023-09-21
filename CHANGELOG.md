@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.13
+* Fixed warning text.
+
 ## 1.0.12
 * Fixed yarn support when system has Hadoop CLI.
 
