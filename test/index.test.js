@@ -94,7 +94,7 @@ test('throws on missing package.json', async () => {
   throws(
     runUpdate,
     'Cannot find package.json. ' +
-      'Is this the right directory to run `npx browserslist --update-db` in?'
+      'Is this the right directory to run `npx update-browserslist-db` in?'
   )
 })
 
