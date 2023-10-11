@@ -38,6 +38,7 @@ function detectLockfile() {
   let lockfileShrinkwrap = join(packageDir, 'npm-shrinkwrap.json')
   let lockfileYarn = join(packageDir, 'yarn.lock')
   let lockfilePnpm = join(packageDir, 'pnpm-lock.yaml')
+  let lockfileBun = join(packageDir, 'bun.lockb')
 
   if (existsSync(lockfilePnpm)) {
     return { file: lockfilePnpm, mode: 'pnpm' }
@@ -50,6 +51,8 @@ function detectLockfile() {
     return lock
   } else if (existsSync(lockfileShrinkwrap)) {
     return { file: lockfileShrinkwrap, mode: 'npm' }
+  } else if (existsSync(lockfileBun)) {
+    return { file: lockfileBun, mode: 'bun' }
   }
   throw new BrowserslistUpdateError(
     'No lockfile found. Run "npm install", "yarn install" or "pnpm install"'
@@ -167,12 +170,18 @@ function updateYarnLockfile(lock, latest) {
   return { content, versions }
 }
 
+function updateBunLockfile(lock, latest) {
+  throw new Error("To be implemented")
+}
+
 function updateLockfile(lock, latest) {
   if (!lock.content) lock.content = readFileSync(lock.file).toString()
 
   let updatedLockFile
   if (lock.mode === 'yarn') {
     updatedLockFile = updateYarnLockfile(lock, latest)
+  } else if (lock.mode === 'bun') {
+    updatedLockFile = updateBunLockfile(lock, latest)
   } else {
     updatedLockFile = updateNpmLockfile(lock, latest)
   }
