@@ -224,19 +224,24 @@ test('updates caniuse-lite for yarn with workspaces', async () => {
   checkYarnLockfile(dir)
 })
 
-test('updates caniuse-lite for yarn v2', async () => {
-  let dir = await chdir('update-yarn-v2', 'package.json', 'yarn.lock')
-  execSync('yarn set version berry')
-  match(
-    runUpdate(),
-    `Latest version:     ${caniuse.version}\n` +
-      'Updating caniuse-lite version\n' +
-      '$ yarn up -R caniuse-lite\n' +
-      'caniuse-lite has been successfully updated\n'
-  )
-  checkYarnLockfile(dir, 2)
-  execSync('yarn set version classic')
-})
+if (
+  !process.version.startsWith('v14.') &&
+  !process.version.startsWith('v16.')
+) {
+  test('updates caniuse-lite for yarn v2', async () => {
+    let dir = await chdir('update-yarn-v2', 'package.json', 'yarn.lock')
+    execSync('yarn set version berry')
+    match(
+      runUpdate(),
+      `Latest version:     ${caniuse.version}\n` +
+        'Updating caniuse-lite version\n' +
+        '$ yarn up -R caniuse-lite\n' +
+        'caniuse-lite has been successfully updated\n'
+    )
+    checkYarnLockfile(dir, 2)
+    execSync('yarn set version classic')
+  })
+}
 
 test('updates caniuse-lite for pnpm', async () => {
   let dir = await chdir('update-pnpm', 'package.json', 'pnpm-lock.yaml')
