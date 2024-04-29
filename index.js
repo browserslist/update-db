@@ -248,7 +248,7 @@ function updateWith(print, cmd, getResult = false) {
       '\n'
   )
   try {
-    const result = execSync(cmd);
+    let result = execSync(cmd);
 
     if(getResult){
       return result;
