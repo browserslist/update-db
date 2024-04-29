@@ -44,7 +44,7 @@
   },
   "bin": "cli.js",
   "devDependencies": {
-    "@logux/eslint-config": "^52.0.2",
+    "@logux/eslint-config": "^53.0.1",
     "browserslist": "^4.23.0",
     "c8": "^9.1.0",
     "clean-publish": "^4.4.0",
@@ -78,22 +78,6 @@
       "limit": "16 KB"
     }
   ],
-  "eslintConfig": {
-    "extends": "@logux/eslint-config",
-    "rules": {
-      "node-import/prefer-node-protocol": "off",
-      "consistent-return": "off",
-      "n/global-require": "off"
-    },
-    "overrides": [
-      {
-        "files": "*.test.js",
-        "rules": {
-          "no-control-regex": "off"
-        }
-      }
-    ]
-  },
   "prettier": {
     "arrowParens": "avoid",
     "jsxSingleQuote": false,

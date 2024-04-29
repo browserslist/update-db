@@ -1,4 +1,4 @@
-let { execSync } = require('child_process')
+let { execSync } = require('node:child_process')
 let pico = require('picocolors')
 
 try {

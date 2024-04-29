@@ -1,10 +1,10 @@
 let { copy, ensureDir, readFile, remove } = require('fs-extra')
 let { equal, match, ok, throws } = require('uvu/assert')
-let { execSync } = require('child_process')
+let { execSync } = require('node:child_process')
 let { nanoid } = require('nanoid/non-secure')
-let { tmpdir } = require('os')
+let { tmpdir } = require('node:os')
 let { test } = require('uvu')
-let { join } = require('path')
+let { join } = require('node:path')
 
 let updateDb = require('..')
 
