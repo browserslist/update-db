@@ -56,14 +56,13 @@ function detectLockfile() {
   )
 }
 
-function getLatestInfo(lock) {
+function getLatestInfo(print, lock) {
   if (lock.mode === 'yarn') {
     if (lock.version === 1) {
-      return JSON.parse(execSync('yarnpkg info caniuse-lite --json').toString())
-        .data
+      return JSON.parse(updateWith(print, 'yarnpkg info caniuse-lite --json', true).toString()).data
     } else {
       return JSON.parse(
-        execSync('yarnpkg npm info caniuse-lite --json').toString()
+        updateWith(print, 'yarnpkg npm info caniuse-lite --json', true).toString()
       )
     }
   }
@@ -216,7 +215,7 @@ function updatePackageManually(print, lock, latest) {
       '\n'
   )
   try {
-    execSync(install + ' caniuse-lite')
+    updateWith(print, install + ' caniuse-lite');
   } catch (e) /* c8 ignore start */ {
     print(
       pico.red(
@@ -242,14 +241,18 @@ function updatePackageManually(print, lock, latest) {
   execSync(del + ' caniuse-lite')
 }
 
-function updateWith(print, cmd) {
+function updateWith(print, cmd, getResult = false) {
   print(
     'Updating caniuse-lite version\n' +
       pico.yellow('$ ' + cmd.replace('yarnpkg', 'yarn')) +
       '\n'
   )
   try {
-    execSync(cmd)
+    const result = execSync(cmd);
+
+    if(getResult){
+      return result;
+    }
   } catch (e) /* c8 ignore start */ {
     print(pico.red(e.stdout.toString()))
     print(
@@ -269,7 +272,7 @@ function updateWith(print, cmd) {
 
 module.exports = function updateDB(print = defaultPrint) {
   let lock = detectLockfile()
-  let latest = getLatestInfo(lock)
+  let latest = getLatestInfo(print, lock)
 
   let listError
   let oldList
