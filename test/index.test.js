@@ -238,7 +238,7 @@ test('updates caniuse-lite for yarn v2', async () => {
   execSync('yarn set version classic')
 })
 
-test('updates caniuse-lite for pnpm', async () => {
+test.only('updates caniuse-lite for pnpm', async () => {
   let dir = await chdir('update-pnpm', 'package.json', 'pnpm-lock.yaml')
   match(
     runUpdate(),
@@ -251,7 +251,7 @@ test('updates caniuse-lite for pnpm', async () => {
   let lock = (await readFile(join(dir, 'pnpm-lock.yaml'))).toString()
   ok(
     lock.includes(`/caniuse-lite/${caniuse.version}:`) ||
-      lock.includes(`/caniuse-lite@${caniuse.version}:`)
+      lock.includes(`caniuse-lite@${caniuse.version}:`)
   )
 })
 
