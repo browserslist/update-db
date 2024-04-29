@@ -238,7 +238,7 @@ test('updates caniuse-lite for yarn v2', async () => {
   execSync('yarn set version classic')
 })
 
-test.only('updates caniuse-lite for pnpm', async () => {
+test('updates caniuse-lite for pnpm', async () => {
   let dir = await chdir('update-pnpm', 'package.json', 'pnpm-lock.yaml')
   match(
     runUpdate(),
