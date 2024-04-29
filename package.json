@@ -82,6 +82,7 @@
     "extends": "@logux/eslint-config",
     "rules": {
       "node-import/prefer-node-protocol": "off",
+      "consistent-return": "off",
       "n/global-require": "off"
     },
     "overrides": [
