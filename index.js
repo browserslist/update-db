@@ -245,7 +245,7 @@ function updatePackageManually(print, lock, latest) {
 function updateWith(print, cmd) {
   print( 'Updating caniuse-lite version\n' + pico.yellow('$ ' + cmd) + '\n' )
   try {
-    execSync(cmd);
+    execSync(cmd)
   } catch (e) /* c8 ignore start */ {
     print(pico.red(e.stdout.toString()))
     print(
