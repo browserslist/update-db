@@ -8,6 +8,10 @@ let { join } = require('node:path')
 
 let updateDb = require('..')
 
+// Check if HADOOP_HOME is set to determine if this is running in a Hadoop environment
+const IsHadoopExists = !! process.env.HADOOP_HOME
+const yarnCommand = IsHadoopExists ? 'yarnpkg' : 'yarn'
+
 let testDir
 test.after.each(async () => {
   process.chdir(__dirname)
@@ -239,7 +243,7 @@ if (
         'caniuse-lite has been successfully updated\n'
     )
     checkYarnLockfile(dir, 2)
-    execSync('yarn set version classic')
+    execSync(yarnCommand + ' set version classic')
   })
 }
 

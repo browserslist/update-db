@@ -17,6 +17,10 @@ function BrowserslistUpdateError(message) {
 
 BrowserslistUpdateError.prototype = Error.prototype
 
+// Check if HADOOP_HOME is set to determine if this is running in a Hadoop environment
+const IsHadoopExists = !! process.env.HADOOP_HOME
+const yarnCommand = IsHadoopExists ? 'yarnpkg' : 'yarn'
+
 /* c8 ignore next 3 */
 function defaultPrint(str) {
   process.stdout.write(str)
@@ -59,12 +63,9 @@ function detectLockfile() {
 function getLatestInfo(lock) {
   if (lock.mode === 'yarn') {
     if (lock.version === 1) {
-      return JSON.parse(execSync('yarnpkg info caniuse-lite --json').toString())
-        .data
+      return JSON.parse(execSync(yarnCommand + ' info caniuse-lite --json').toString()).data
     } else {
-      return JSON.parse(
-        execSync('yarnpkg npm info caniuse-lite --json').toString()
-      )
+      return JSON.parse(execSync(yarnCommand + ' npm info caniuse-lite --json').toString())
     }
   }
   if (lock.mode === 'pnpm') {
@@ -209,10 +210,10 @@ function updatePackageManually(print, lock, latest) {
   )
   writeFileSync(lock.file, lockfileData.content)
 
-  let install = lock.mode === 'yarn' ? 'yarnpkg add -W' : lock.mode + ' install'
+  let install = lock.mode === 'yarn' ? yarnCommand + ' add -W' : lock.mode + ' install'
   print(
     'Installing new caniuse-lite version\n' +
-      pico.yellow('$ ' + install.replace('yarnpkg', 'yarn') + ' caniuse-lite') +
+      pico.yellow('$ ' + install + ' caniuse-lite') +
       '\n'
   )
   try {
@@ -232,24 +233,19 @@ function updatePackageManually(print, lock, latest) {
     process.exit(1)
   } /* c8 ignore end */
 
-  let del =
-    lock.mode === 'yarn' ? 'yarnpkg remove -W' : lock.mode + ' uninstall'
+  let del = lock.mode === 'yarn' ? yarnCommand + ' remove -W' : lock.mode + ' uninstall'
   print(
     'Cleaning package.json dependencies from caniuse-lite\n' +
-      pico.yellow('$ ' + del.replace('yarnpkg', 'yarn') + ' caniuse-lite') +
+      pico.yellow('$ ' + del + ' caniuse-lite') +
       '\n'
   )
   execSync(del + ' caniuse-lite')
 }
 
 function updateWith(print, cmd) {
-  print(
-    'Updating caniuse-lite version\n' +
-      pico.yellow('$ ' + cmd.replace('yarnpkg', 'yarn')) +
-      '\n'
-  )
+  print( 'Updating caniuse-lite version\n' + pico.yellow('$ ' + cmd) + '\n' )
   try {
-    execSync(cmd)
+    execSync(cmd);
   } catch (e) /* c8 ignore start */ {
     print(pico.red(e.stdout.toString()))
     print(
@@ -282,7 +278,7 @@ module.exports = function updateDB(print = defaultPrint) {
   print('Latest version:     ' + pico.bold(pico.green(latest.version)) + '\n')
 
   if (lock.mode === 'yarn' && lock.version !== 1) {
-    updateWith(print, 'yarnpkg up -R caniuse-lite')
+    updateWith(print, yarnCommand + ' up -R caniuse-lite')
   } else if (lock.mode === 'pnpm') {
     updateWith(print, 'pnpm up caniuse-lite')
   } else {
