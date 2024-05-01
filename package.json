@@ -52,7 +52,7 @@
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-es5": "^1.5.0",
     "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-n": "^17.3.1",
+    "eslint-plugin-n": "^17.4.0",
     "eslint-plugin-node-imports": "^1.0.2",
     "eslint-plugin-perfectionist": "^2.10.0",
     "eslint-plugin-prefer-let": "^3.0.1",
