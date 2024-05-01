@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.14
+* Another way to fix yarn and Hadoop CLI conflict (by Al Amin Ahamed).
+
 ## 1.0.13
 * Fixed warning text.
 
