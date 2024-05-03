@@ -18,7 +18,7 @@ function BrowserslistUpdateError(message) {
 BrowserslistUpdateError.prototype = Error.prototype
 
 // Check if HADOOP_HOME is set to determine if this is running in a Hadoop environment
-const IsHadoopExists = !! process.env.HADOOP_HOME
+const IsHadoopExists = !!process.env.HADOOP_HOME
 const yarnCommand = IsHadoopExists ? 'yarnpkg' : 'yarn'
 
 /* c8 ignore next 3 */
@@ -63,9 +63,13 @@ function detectLockfile() {
 function getLatestInfo(lock) {
   if (lock.mode === 'yarn') {
     if (lock.version === 1) {
-      return JSON.parse(execSync(yarnCommand + ' info caniuse-lite --json').toString()).data
+      return JSON.parse(
+        execSync(yarnCommand + ' info caniuse-lite --json').toString()
+      ).data
     } else {
-      return JSON.parse(execSync(yarnCommand + ' npm info caniuse-lite --json').toString())
+      return JSON.parse(
+        execSync(yarnCommand + ' npm info caniuse-lite --json').toString()
+      )
     }
   }
   if (lock.mode === 'pnpm') {
@@ -210,7 +214,8 @@ function updatePackageManually(print, lock, latest) {
   )
   writeFileSync(lock.file, lockfileData.content)
 
-  let install = lock.mode === 'yarn' ? yarnCommand + ' add -W' : lock.mode + ' install'
+  let install =
+    lock.mode === 'yarn' ? yarnCommand + ' add -W' : lock.mode + ' install'
   print(
     'Installing new caniuse-lite version\n' +
       pico.yellow('$ ' + install + ' caniuse-lite') +
@@ -233,7 +238,8 @@ function updatePackageManually(print, lock, latest) {
     process.exit(1)
   } /* c8 ignore end */
 
-  let del = lock.mode === 'yarn' ? yarnCommand + ' remove -W' : lock.mode + ' uninstall'
+  let del =
+    lock.mode === 'yarn' ? yarnCommand + ' remove -W' : lock.mode + ' uninstall'
   print(
     'Cleaning package.json dependencies from caniuse-lite\n' +
       pico.yellow('$ ' + del + ' caniuse-lite') +
@@ -243,7 +249,7 @@ function updatePackageManually(print, lock, latest) {
 }
 
 function updateWith(print, cmd) {
-  print( 'Updating caniuse-lite version\n' + pico.yellow('$ ' + cmd) + '\n' )
+  print('Updating caniuse-lite version\n' + pico.yellow('$ ' + cmd) + '\n')
   try {
     execSync(cmd)
   } catch (e) /* c8 ignore start */ {
@@ -297,15 +303,24 @@ module.exports = function updateDB(print = defaultPrint) {
   }
 
   if (listError) {
-    print(
-      pico.red(
-        '\n' +
-          listError.stack +
-          '\n\n' +
-          'Problem with browser list retrieval.\n' +
-          'Target browser changes won’t be shown.\n'
+    if (listError.message.includes("Cannot find module 'browserslist'")) {
+      print(
+        pico.gray(
+          'Install `browserslist` to your direct dependencies ' +
+            'to see target browser changes\n'
+        )
       )
-    )
+    } else {
+      print(
+        pico.red(
+          '\n' +
+            listError.stack +
+            '\n\n' +
+            'Problem with browser list retrieval.\n' +
+            'Target browser changes won’t be shown.\n'
+        )
+      )
+    }
   } else {
     let changes = diffBrowsers(oldList, newList)
     if (changes) {
