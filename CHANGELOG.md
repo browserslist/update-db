@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.0.16
+* Fixed old Node.js support.
+
 ## 1.0.15
 * Fixed warning on missed `browserslist` in direct dependencies.
 
