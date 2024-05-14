@@ -1,6 +1,6 @@
-let { existsSync, readFileSync, writeFileSync } = require('node:fs')
-let { execSync } = require('node:child_process')
-let { join } = require('node:path')
+let { existsSync, readFileSync, writeFileSync } = require('fs')
+let { execSync } = require('child_process')
+let { join } = require('path')
 let escalade = require('escalade/sync')
 let pico = require('picocolors')
 

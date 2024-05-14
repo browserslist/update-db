@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-let { readFileSync } = require('node:fs')
-let { join } = require('node:path')
+let { readFileSync } = require('fs')
+let { join } = require('path')
 
 require('./check-npm-version')
 let updateDb = require('./')

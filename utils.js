@@ -1,4 +1,4 @@
-const { EOL } = require('node:os')
+const { EOL } = require('os')
 
 const getFirstRegexpMatchOrDefault = (text, regexp, defaultValue) => {
   regexp.lastIndex = 0 // https://stackoverflow.com/a/11477448/4536543
