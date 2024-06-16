@@ -6,7 +6,7 @@
 CLI tool to update `caniuse-lite` with browsers DB
 from [Browserslist](https://github.com/browserslist/browserslist/) config.
 
-Some queries like `last 2 version` or `>1%` depends on actual data
+Some queries like `last 2 versions` or `>1%` depend on actual data
 from `caniuse-lite`.
 
 ```sh
@@ -18,12 +18,12 @@ npx update-browserslist-db@latest
        alt="Sponsored by Evil Martians" width="236" height="54">
 </a>
 
-## Why You Need to Call it Regularly
+## Why you need to call it regularly
 
 `npx update-browserslist-db@latest` updates `caniuse-lite` version
-in your npm, yarn or pnpm lock file.
+in your npm, yarn, or pnpm lock file.
 
-This update will bring data about new browsers to polyfills tools
+This update will bring data about new browsers to polyfill tools
 like Autoprefixer or Babel and reduce already unnecessary polyfills.
 
 You need to do it regularly for three reasons:
@@ -32,6 +32,6 @@ You need to do it regularly for three reasons:
    `last 2 versions` or `>1%`. For example, if you created your project
    2 years ago and did not update your dependencies, `last 1 version`
    will return 2-year-old browsers.
-2. Actual browsers data will lead to using less polyfills. It will reduce
+2. Actual browser data will lead to using less polyfills. It will reduce
    size of JS and CSS files and improve website performance.
-3. `caniuse-lite` deduplication: to synchronize version in different tools.
+3. `caniuse-lite` deduplication: to synchronize versions in different tools.
