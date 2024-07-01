@@ -5,11 +5,34 @@ let { nanoid } = require('nanoid/non-secure')
 let { tmpdir } = require('node:os')
 let { test } = require('uvu')
 let { join } = require('node:path')
+let pico = require('picocolors')
 
 let updateDb = require('..')
 
 // Fix CLI tool name conflict between Yarn and Hadoop
-const yarnCommand = process.env.HADOOP_HOME ? 'yarnpkg' : 'yarn'
+const YARN_CMD = process.env.HADOOP_HOME ? 'yarnpkg' : 'yarn'
+
+let yarnInstalled
+try {
+  execSync('yarn --version 2>/dev/null')
+  yarnInstalled = true
+} catch {
+  process.stderr.write(
+    pico.yellow('Yarn is not installed. Skipping Yarn tests\n')
+  )
+  yarnInstalled = false
+}
+
+let bunInstalled
+try {
+  execSync('bun --version 2>/dev/null')
+  bunInstalled = true
+} catch {
+  process.stderr.write(
+    pico.yellow('Bun is not installed. Skipping Bun tests\n')
+  )
+  bunInstalled = false
+}
 
 let testDir
 test.after.each(async () => {
@@ -197,53 +220,55 @@ test('skips the npm-shrinkwrap update if caniuse-lite is up to date', async () =
   equal(lock.dependencies['caniuse-lite'].version, caniuse.version)
 })
 
-test('updates caniuse-lite for yarn', async () => {
-  let dir = await chdir('update-yarn', 'package.json', 'yarn.lock')
-  checkRunUpdateContents('1.0.30001035', 'yarn')
-  checkYarnLockfile(dir)
-})
-
-test('updates caniuse-lite for yarn without integrity', async () => {
-  let dir = await chdir(
-    'update-yarn-without-integrity',
-    'package.json',
-    'yarn.lock'
-  )
-  checkRunUpdateContents('1.0.30001035', 'yarn')
-  checkYarnLockfile(dir)
-})
-
-test('skips the yarn update if caniuse-lite is up to date', async () => {
-  let dir = await chdir('update-yarn', 'package.json', 'yarn.lock')
-  checkRunUpdateContents('1.0.30001035', 'yarn')
-  checkYarnLockfile(dir)
-  checkRunUpdateNoChanges()
-  checkYarnLockfile(dir)
-})
-
-test('updates caniuse-lite for yarn with workspaces', async () => {
-  let dir = await chdir('update-yarn-workspaces', 'package.json', 'yarn.lock')
-  checkRunUpdateContents('1.0.30001156', 'yarn')
-  checkYarnLockfile(dir)
-})
-
-if (
-  !process.version.startsWith('v14.') &&
-  !process.version.startsWith('v16.')
-) {
-  test('updates caniuse-lite for yarn v2', async () => {
-    let dir = await chdir('update-yarn-v2', 'package.json', 'yarn.lock')
-    execSync('yarn set version berry')
-    match(
-      runUpdate(),
-      `Latest version:     ${caniuse.version}\n` +
-        'Updating caniuse-lite version\n' +
-        '$ yarn up -R caniuse-lite\n' +
-        'caniuse-lite has been successfully updated\n'
-    )
-    checkYarnLockfile(dir, 2)
-    execSync(yarnCommand + ' set version classic')
+if (yarnInstalled) {
+  test('updates caniuse-lite for yarn', async () => {
+    let dir = await chdir('update-yarn', 'package.json', 'yarn.lock')
+    checkRunUpdateContents('1.0.30001035', 'yarn')
+    checkYarnLockfile(dir)
   })
+
+  test('updates caniuse-lite for yarn without integrity', async () => {
+    let dir = await chdir(
+      'update-yarn-without-integrity',
+      'package.json',
+      'yarn.lock'
+    )
+    checkRunUpdateContents('1.0.30001035', 'yarn')
+    checkYarnLockfile(dir)
+  })
+
+  test('skips the yarn update if caniuse-lite is up to date', async () => {
+    let dir = await chdir('update-yarn', 'package.json', 'yarn.lock')
+    checkRunUpdateContents('1.0.30001035', 'yarn')
+    checkYarnLockfile(dir)
+    checkRunUpdateNoChanges()
+    checkYarnLockfile(dir)
+  })
+
+  test('updates caniuse-lite for yarn with workspaces', async () => {
+    let dir = await chdir('update-yarn-workspaces', 'package.json', 'yarn.lock')
+    checkRunUpdateContents('1.0.30001156', 'yarn')
+    checkYarnLockfile(dir)
+  })
+
+  if (
+    !process.version.startsWith('v14.') &&
+    !process.version.startsWith('v16.')
+  ) {
+    test('updates caniuse-lite for yarn v2', async () => {
+      let dir = await chdir('update-yarn-v2', 'package.json', 'yarn.lock')
+      execSync('yarn set version berry')
+      match(
+        runUpdate(),
+        `Latest version:     ${caniuse.version}\n` +
+          'Updating caniuse-lite version\n' +
+          '$ yarn up -R caniuse-lite\n' +
+          'caniuse-lite has been successfully updated\n'
+      )
+      checkYarnLockfile(dir, 2)
+      execSync(YARN_CMD + ' set version classic')
+    })
+  }
 }
 
 test('updates caniuse-lite for pnpm', async () => {
@@ -263,20 +288,22 @@ test('updates caniuse-lite for pnpm', async () => {
   )
 })
 
-test('updates caniuse-lite for bun', async () => {
-  await chdir('update-bun', 'package.json', 'bun.lockb')
-  match(
-    runUpdate(),
-    `Latest version:     ${caniuse.version}\n` +
-      'Updating caniuse-lite version\n' +
-      '$ bun update caniuse-lite\n' +
-      'caniuse-lite has been successfully updated\n'
-  )
+if (bunInstalled) {
+  test('updates caniuse-lite for bun', async () => {
+    await chdir('update-bun', 'package.json', 'bun.lockb')
+    match(
+      runUpdate(),
+      `Latest version:     ${caniuse.version}\n` +
+        'Updating caniuse-lite version\n' +
+        '$ bun update caniuse-lite\n' +
+        'caniuse-lite has been successfully updated\n'
+    )
 
-  let dependencies = execSync('bun pm ls --all', {
-    env: { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1' }
-  }).toString()
-  ok(dependencies.includes(`caniuse-lite@${caniuse.version}`))
-})
+    let dependencies = execSync('bun pm ls --all', {
+      env: { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1' }
+    }).toString()
+    ok(dependencies.includes(`caniuse-lite@${caniuse.version}`))
+  })
+}
 
 test.run()
