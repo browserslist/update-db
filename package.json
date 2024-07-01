@@ -36,7 +36,6 @@
     "test": "pnpm run /^test:/"
   },
   "dependencies": {
-    "bun": "^1.1.17",
     "escalade": "^3.1.2",
     "picocolors": "^1.0.1"
   },
