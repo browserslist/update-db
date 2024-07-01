@@ -9,7 +9,7 @@ let { join } = require('node:path')
 let updateDb = require('..')
 
 // Check if HADOOP_HOME is set to determine if this is running in a Hadoop environment
-const IsHadoopExists = !! process.env.HADOOP_HOME
+const IsHadoopExists = !!process.env.HADOOP_HOME
 const yarnCommand = IsHadoopExists ? 'yarnpkg' : 'yarn'
 
 let testDir
@@ -275,8 +275,7 @@ test('updates caniuse-lite for bun', async () => {
   )
 
   let lock = (await readFile(join(dir, 'bun.lockb'))).toString()
-  ok(
-    lock.includes(`/caniuse-lite-${caniuse.version}`))
+  ok(lock.includes(`/caniuse-lite-${caniuse.version}`))
 })
 
 test.run()
