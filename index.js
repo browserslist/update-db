@@ -57,8 +57,6 @@ function detectLockfile() {
     return lock
   } else if (existsSync(lockfileShrinkwrap)) {
     return { file: lockfileShrinkwrap, mode: 'npm' }
-  } else if (existsSync(lockfileBun)) {
-    return { file: lockfileBun, mode: 'bun' }
   }
   throw new BrowserslistUpdateError(
     'No lockfile found. Run "npm install", "yarn install" or "pnpm install"'
