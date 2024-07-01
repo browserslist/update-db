@@ -273,8 +273,10 @@ test('updates caniuse-lite for bun', async () => {
       'caniuse-lite has been successfully updated\n'
   )
 
-  let pmls = execSync('bun pm ls --all', { env: { ...process.env, FORCE_COLOR: "0", NO_COLOR: "1" } }).toString()
-  ok(pmls.includes(`caniuse-lite@${caniuse.version}`))
+  let dependencies = execSync('bun pm ls --all', {
+    env: { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1' }
+  }).toString()
+  ok(dependencies.includes(`caniuse-lite@${caniuse.version}`))
 })
 
 test.run()
