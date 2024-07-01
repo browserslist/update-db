@@ -42,9 +42,12 @@ function detectLockfile() {
   let lockfileShrinkwrap = join(packageDir, 'npm-shrinkwrap.json')
   let lockfileYarn = join(packageDir, 'yarn.lock')
   let lockfilePnpm = join(packageDir, 'pnpm-lock.yaml')
+  let lockfileBun = join(packageDir, 'bun.lockb')
 
   if (existsSync(lockfilePnpm)) {
     return { file: lockfilePnpm, mode: 'pnpm' }
+  } else if (existsSync(lockfileBun)) {
+    return { file: lockfileBun, mode: 'bun' }
   } else if (existsSync(lockfileNpm)) {
     return { file: lockfileNpm, mode: 'npm' }
   } else if (existsSync(lockfileYarn)) {
@@ -287,6 +290,8 @@ module.exports = function updateDB(print = defaultPrint) {
     updateWith(print, yarnCommand + ' up -R caniuse-lite')
   } else if (lock.mode === 'pnpm') {
     updateWith(print, 'pnpm up caniuse-lite')
+  } else if (lock.mode === 'bun') {
+    updateWith(print, 'bun update caniuse-lite')
   } else {
     updatePackageManually(print, lock, latest)
   }
