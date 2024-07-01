@@ -46,6 +46,8 @@ function detectLockfile() {
 
   if (existsSync(lockfilePnpm)) {
     return { file: lockfilePnpm, mode: 'pnpm' }
+  } else if (existsSync(lockfileBun)) {
+    return { file: lockfileBun, mode: 'bun' }
   } else if (existsSync(lockfileNpm)) {
     return { file: lockfileNpm, mode: 'npm' }
   } else if (existsSync(lockfileYarn)) {
