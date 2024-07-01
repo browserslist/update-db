@@ -264,4 +264,19 @@ test('updates caniuse-lite for pnpm', async () => {
   )
 })
 
+test('updates caniuse-lite for bun', async () => {
+  let dir = await chdir('update-bun', 'package.json', 'bun.lockb')
+  match(
+    runUpdate(),
+    `Latest version:     ${caniuse.version}\n` +
+      'Updating caniuse-lite version\n' +
+      '$ bun update caniuse-lite\n' +
+      'caniuse-lite has been successfully updated\n'
+  )
+
+  let lock = (await readFile(join(dir, 'bun.lockb'))).toString()
+  ok(
+    lock.includes(`/caniuse-lite-${caniuse.version}`))
+})
+
 test.run()
