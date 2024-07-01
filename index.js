@@ -42,6 +42,7 @@ function detectLockfile() {
   let lockfileShrinkwrap = join(packageDir, 'npm-shrinkwrap.json')
   let lockfileYarn = join(packageDir, 'yarn.lock')
   let lockfilePnpm = join(packageDir, 'pnpm-lock.yaml')
+  let lockfileBun = join(packageDir, 'bun.lockb')
 
   if (existsSync(lockfilePnpm)) {
     return { file: lockfilePnpm, mode: 'pnpm' }
@@ -54,6 +55,8 @@ function detectLockfile() {
     return lock
   } else if (existsSync(lockfileShrinkwrap)) {
     return { file: lockfileShrinkwrap, mode: 'npm' }
+  } else if (existsSync(lockfileBun)) {
+    return { file: lockfileBun, mode: 'bun' }
   }
   throw new BrowserslistUpdateError(
     'No lockfile found. Run "npm install", "yarn install" or "pnpm install"'
@@ -75,6 +78,11 @@ function getLatestInfo(lock) {
   if (lock.mode === 'pnpm') {
     return JSON.parse(execSync('pnpm info caniuse-lite --json').toString())
   }
+  if (lock.mode === 'bun') {
+    //  TO-DO: No 'bun info' yet. Created issue: https://github.com/oven-sh/bun/issues/12280
+    return JSON.parse(execSync(' npm info caniuse-lite --json').toString())
+  }
+
   return JSON.parse(execSync('npm show caniuse-lite --json').toString())
 }
 
@@ -287,6 +295,8 @@ module.exports = function updateDB(print = defaultPrint) {
     updateWith(print, yarnCommand + ' up -R caniuse-lite')
   } else if (lock.mode === 'pnpm') {
     updateWith(print, 'pnpm up caniuse-lite')
+  } else if (lock.mode === 'bun') {
+    updateWith(print, 'bun update caniuse-lite')
   } else {
     updatePackageManually(print, lock, latest)
   }
