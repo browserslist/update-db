@@ -1,7 +1,7 @@
-let { existsSync, readFileSync, writeFileSync } = require('fs')
 let { execSync } = require('child_process')
-let { join } = require('path')
 let escalade = require('escalade/sync')
+let { existsSync, readFileSync, writeFileSync } = require('fs')
+let { join } = require('path')
 let pico = require('picocolors')
 
 const { detectEOL, detectIndent } = require('./utils')
