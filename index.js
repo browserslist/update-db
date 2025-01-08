@@ -322,11 +322,8 @@ module.exports = function updateDB(print = defaultPrint) {
       )
     } else {
       print(
-        pico.red(
-          '\n' +
-            listError.stack +
-            '\n\n' +
-            'Problem with browser list retrieval.\n' +
+        pico.gray(
+          'Problem with browser list retrieval.\n' +
             'Target browser changes won’t be shown.\n'
         )
       )
