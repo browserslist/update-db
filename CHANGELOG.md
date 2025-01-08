@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.1.2
+* Use less aggressive message on browsers diff error.
+
 ## 1.1.1
 * Fixed types.
 
