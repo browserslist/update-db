@@ -23,7 +23,8 @@ npx update-browserslist-db@latest
 `npx update-browserslist-db@latest` updates `caniuse-lite` version
 in your npm, yarn, or pnpm lock file.
 
-This update will bring data about new browsers to polyfill tools
+This update will bring data about new browsers 
+to polyfill tools
 like Autoprefixer or Babel and reduce already unnecessary polyfills.
 
 You need to do it regularly for three reasons:
