@@ -39,3 +39,10 @@ You need to do it regularly for three reasons:
 2. Actual browser data will lead to using less polyfills. It will reduce
    size of JS and CSS files and improve website performance.
 3. `caniuse-lite` deduplication: to synchronize versions in different tools.
+
+## Security Contact
+
+To report a security vulnerability, please use the [Tidelift security contact].
+Tidelift will coordinate the fix and disclosure.
+
+[Tidelift security contact]: https://tidelift.com/security
