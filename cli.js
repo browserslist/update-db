@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-let { readFileSync } = require('fs')
+let { readFileSync } = require('fs')`
 let { join } = require('path')
 
 require('./check-npm-version')
