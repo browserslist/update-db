@@ -277,7 +277,7 @@ test('updates caniuse-lite for pnpm', async () => {
     runUpdate(),
     `Latest version:     ${caniuse.version}\n` +
       'Updating caniuse-lite version\n' +
-      '$ pnpm up caniuse-lite\n' +
+      '$ pnpm up --no-save caniuse-lite\n' +
       'caniuse-lite has been successfully updated\n'
   )
 
