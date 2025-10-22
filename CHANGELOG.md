@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.1.4
+* Fixed `package.json` changes on `pnpm` update.
+
 ## 1.1.3
 * Fixed Bun support.
 
