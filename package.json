@@ -44,13 +44,13 @@
   },
   "bin": "cli.js",
   "devDependencies": {
-    "@logux/eslint-config": "^55.0.1",
-    "browserslist": "^4.24.4",
+    "@logux/eslint-config": "^56.1.0",
+    "browserslist": "^4.26.3",
     "c8": "^10.1.3",
-    "clean-publish": "^5.1.0",
-    "eslint": "^9.21.0",
-    "fs-extra": "^11.3.0",
-    "nanoid": "^3.3.8",
+    "clean-publish": "^6.0.0",
+    "eslint": "^9.38.0",
+    "fs-extra": "^11.3.2",
+    "nanoid": "^5.1.6",
     "uvu": "^0.5.6"
   },
   "clean-publish": {
