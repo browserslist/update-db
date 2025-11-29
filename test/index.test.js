@@ -75,9 +75,9 @@ function checkRunUpdateContents(installedVersions, system) {
       ` ${installedVersions}\n` +
       'Removing old caniuse-lite from lock file\n' +
       'Installing new caniuse-lite version\n' +
-      `$ ${addCmd} caniuse-lite\n` +
+      `$ ${addCmd} caniuse-lite baseline-browser-mapping\n` +
       'Cleaning package.json dependencies from caniuse-lite\n' +
-      `$ ${rmCmd} caniuse-lite\n` +
+      `$ ${rmCmd} caniuse-lite baseline-browser-mapping\n` +
       'caniuse-lite has been successfully updated\n'
   )
 }
@@ -262,7 +262,7 @@ if (yarnInstalled) {
         runUpdate(),
         `Latest version:     ${caniuse.version}\n` +
           'Updating caniuse-lite version\n' +
-          '$ yarn up -R caniuse-lite\n' +
+          '$ yarn up -R caniuse-lite baseline-browser-mapping\n' +
           'caniuse-lite has been successfully updated\n'
       )
       checkYarnLockfile(dir, 2)
@@ -277,7 +277,7 @@ test('updates caniuse-lite for pnpm', async () => {
     runUpdate(),
     `Latest version:     ${caniuse.version}\n` +
       'Updating caniuse-lite version\n' +
-      '$ pnpm up --no-save caniuse-lite\n' +
+      '$ pnpm up --no-save caniuse-lite baseline-browser-mapping\n' +
       'caniuse-lite has been successfully updated\n'
   )
 
@@ -295,7 +295,7 @@ if (bunInstalled) {
       runUpdate(),
       `Latest version:     ${caniuse.version}\n` +
         'Updating caniuse-lite version\n' +
-        '$ bun update caniuse-lite\n' +
+        '$ bun update caniuse-lite baseline-browser-mapping\n' +
         'caniuse-lite has been successfully updated\n'
     )
 

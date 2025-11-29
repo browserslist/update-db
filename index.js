@@ -227,11 +227,11 @@ function updatePackageManually(print, lock, latest) {
     lock.mode === 'yarn' ? yarnCommand + ' add -W' : lock.mode + ' install'
   print(
     'Installing new caniuse-lite version\n' +
-      pico.yellow('$ ' + install + ' caniuse-lite') +
+      pico.yellow('$ ' + install + ' caniuse-lite baseline-browser-mapping') +
       '\n'
   )
   try {
-    execSync(install + ' caniuse-lite')
+    execSync(install + ' caniuse-lite baseline-browser-mapping')
   } catch (e) /* c8 ignore start */ {
     print(
       pico.red(
@@ -251,10 +251,10 @@ function updatePackageManually(print, lock, latest) {
     lock.mode === 'yarn' ? yarnCommand + ' remove -W' : lock.mode + ' uninstall'
   print(
     'Cleaning package.json dependencies from caniuse-lite\n' +
-      pico.yellow('$ ' + del + ' caniuse-lite') +
+      pico.yellow('$ ' + del + ' caniuse-lite baseline-browser-mapping') +
       '\n'
   )
-  execSync(del + ' caniuse-lite')
+  execSync(del + ' caniuse-lite baseline-browser-mapping')
 }
 
 function updateWith(print, cmd) {
@@ -293,11 +293,14 @@ module.exports = function updateDB(print = defaultPrint) {
   print('Latest version:     ' + pico.bold(pico.green(latest.version)) + '\n')
 
   if (lock.mode === 'yarn' && lock.version !== 1) {
-    updateWith(print, yarnCommand + ' up -R caniuse-lite')
+    updateWith(
+      print,
+      yarnCommand + ' up -R caniuse-lite baseline-browser-mapping'
+    )
   } else if (lock.mode === 'pnpm') {
-    updateWith(print, 'pnpm up --no-save caniuse-lite')
+    updateWith(print, 'pnpm up --no-save caniuse-lite baseline-browser-mapping')
   } else if (lock.mode === 'bun') {
-    updateWith(print, 'bun update caniuse-lite')
+    updateWith(print, 'bun update caniuse-lite baseline-browser-mapping')
   } else {
     updatePackageManually(print, lock, latest)
   }
