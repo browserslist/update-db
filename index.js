@@ -302,7 +302,7 @@ module.exports = function updateDB(print = defaultPrint) {
     let packages = lockContent.includes('baseline-browser-mapping')
       ? 'caniuse-lite baseline-browser-mapping'
       : 'caniuse-lite'
-    updateWith(print, 'pnpm up --no-save ' + packages)
+    updateWith(print, 'pnpm up --depth=Infinity --no-save ' + packages)
   } else if (lock.mode === 'bun') {
     updateWith(print, 'bun update caniuse-lite baseline-browser-mapping')
   } else {
