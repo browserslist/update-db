@@ -298,7 +298,11 @@ module.exports = function updateDB(print = defaultPrint) {
       yarnCommand + ' up -R caniuse-lite baseline-browser-mapping'
     )
   } else if (lock.mode === 'pnpm') {
-    updateWith(print, 'pnpm up --no-save caniuse-lite baseline-browser-mapping')
+    let lockContent = readFileSync(lock.file).toString()
+    let packages = lockContent.includes('baseline-browser-mapping')
+      ? 'caniuse-lite baseline-browser-mapping'
+      : 'caniuse-lite'
+    updateWith(print, 'pnpm up --no-save ' + packages)
   } else if (lock.mode === 'bun') {
     updateWith(print, 'bun update caniuse-lite baseline-browser-mapping')
   } else {
