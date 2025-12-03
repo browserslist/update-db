@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.0
+* Add Baseline data updating too.
+
 ## 1.1.4
 * Fixed `package.json` changes on `pnpm` update.
 
