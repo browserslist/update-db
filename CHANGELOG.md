@@ -2,10 +2,10 @@
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 1.2.1
-* Fix `ERR_PNPM_NO_PACKAGE_IN_DEPENDENCIES` error on pnpm with old Browserslist.
+* Fixed `ERR_PNPM_NO_PACKAGE_IN_DEPENDENCIES` error on pnpm.
 
 ## 1.2.0
-* Add Baseline data updating too.
+* Added Baseline data updating too.
 
 ## 1.1.4
 * Fixed `package.json` changes on `pnpm` update.
