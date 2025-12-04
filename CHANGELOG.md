@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.2
+* Fixed update on `depth` in pnpm config.
+
 ## 1.2.1
 * Fixed `ERR_PNPM_NO_PACKAGE_IN_DEPENDENCIES` error on pnpm.
 
