@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.2.3
+* Fixed bun support (by @cehenriques).
+
 ## 1.2.2
 * Fixed update on `depth` in pnpm config.
 
