@@ -13,5 +13,4 @@ try {
     )
     process.exit(1)
   }
-  // eslint-disable-next-line no-unused-vars
-} catch (e) {}
+} catch {}
