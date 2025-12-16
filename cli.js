@@ -2,15 +2,10 @@
 
 let { readFileSync } = require('fs')
 let { join } = require('path')
+let pkg = require('./package.json')
 
 require('./check-npm-version')
 let updateDb = require('./')
-
-const ROOT = __dirname
-
-function getPackage() {
-  return JSON.parse(readFileSync(join(ROOT, 'package.json')))
-}
 
 let args = process.argv.slice(2)
 
@@ -26,9 +21,9 @@ function error(msg) {
 }
 
 if (isArg('--help') || isArg('-h')) {
-  process.stdout.write(getPackage().description + '.\n\n' + USAGE + '\n')
+  process.stdout.write(pkg.description + '.\n\n' + USAGE + '\n')
 } else if (isArg('--version') || isArg('-v')) {
-  process.stdout.write('browserslist-lint ' + getPackage().version + '\n')
+  process.stdout.write('browserslist-lint ' + pkg.version + '\n')
 } else {
   try {
     updateDb()
