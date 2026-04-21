@@ -21,7 +21,7 @@
       "url": "https://github.com/sponsors/ai"
     }
   ],
-  "author": "Andrey Sitnik <andrey@sitnik.ru>",
+  "author": "Andrey Sitnik <andrey@sitnik.es>",
   "license": "MIT",
   "repository": "browserslist/update-db",
   "types": "./index.d.ts",
