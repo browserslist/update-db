@@ -16,7 +16,7 @@ npx update-browserslist-db@latest
 Or if using `pnpm`:
 
 ```sh
-pnpm exec update-browserslist-db latest
+pnpm dlx update-browserslist-db latest
 ```
 
 Or if using `bun`:
