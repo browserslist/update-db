@@ -14,7 +14,10 @@ function getPackage() {
 
 let args = process.argv.slice(2)
 
-let USAGE = 'Usage:\n  npx update-browserslist-db\n'
+let USAGE =
+  'Usage:\n' +
+  '  npx update-browserslist-db\n' +
+  '  npx update-browserslist-db --package-manager npm|yarn|pnpm|bun\n'
 
 function isArg(arg) {
   return args.some(i => i === arg)
@@ -25,13 +28,22 @@ function error(msg) {
   process.exit(1)
 }
 
+let packageManagerIndex = args.indexOf('--package-manager')
+let packageManager
+if (packageManagerIndex !== -1) {
+  packageManager = args[packageManagerIndex + 1]
+  if (!packageManager || packageManager.startsWith('-')) {
+    error('Missing value for --package-manager')
+  }
+}
+
 if (isArg('--help') || isArg('-h')) {
   process.stdout.write(getPackage().description + '.\n\n' + USAGE + '\n')
 } else if (isArg('--version') || isArg('-v')) {
   process.stdout.write('browserslist-lint ' + getPackage().version + '\n')
 } else {
   try {
-    updateDb()
+    updateDb(undefined, { packageManager })
   } catch (e) {
     if (e.name === 'BrowserslistUpdateError') {
       error(e.message)

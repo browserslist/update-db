@@ -6,6 +6,8 @@ let pico = require('picocolors')
 
 const { detectEOL, detectIndent } = require('./utils')
 
+const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm', 'bun']
+
 function BrowserslistUpdateError(message) {
   this.name = 'BrowserslistUpdateError'
   this.message = message
@@ -20,13 +22,50 @@ BrowserslistUpdateError.prototype = Error.prototype
 // Check if HADOOP_HOME is set to determine if this is running in a Hadoop environment
 const IsHadoopExists = !!process.env.HADOOP_HOME
 const yarnCommand = IsHadoopExists ? 'yarnpkg' : 'yarn'
+const packageManagerEnv = 'UPDATE_BROWSERSLIST_DB_PM'
 
 /* c8 ignore next 3 */
 function defaultPrint(str) {
   process.stdout.write(str)
 }
 
-function detectLockfile() {
+function getPackageManagerOverride(opts) {
+  let packageManager = opts.packageManager || process.env[packageManagerEnv]
+
+  if (packageManager) {
+    if (!PACKAGE_MANAGERS.includes(packageManager)) {
+      throw new BrowserslistUpdateError(
+        'Package manager must be one of: ' + PACKAGE_MANAGERS.join(', ')
+      )
+    }
+    return packageManager
+  }
+}
+
+function getLockfile(mode, files) {
+  if (mode === 'pnpm' && existsSync(files.pnpm)) {
+    return { file: files.pnpm, mode: 'pnpm' }
+  } else if (mode === 'bun') {
+    if (existsSync(files.bun)) {
+      return { file: files.bun, mode: 'bun' }
+    } else if (existsSync(files.bunBinary)) {
+      return { file: files.bunBinary, mode: 'bun' }
+    }
+  } else if (mode === 'npm') {
+    if (existsSync(files.npm)) {
+      return { file: files.npm, mode: 'npm' }
+    } else if (existsSync(files.shrinkwrap)) {
+      return { file: files.shrinkwrap, mode: 'npm' }
+    }
+  } else if (mode === 'yarn' && existsSync(files.yarn)) {
+    let lock = { file: files.yarn, mode: 'yarn' }
+    lock.content = readFileSync(lock.file).toString()
+    lock.version = /# yarn lockfile v1/.test(lock.content) ? 1 : 2
+    return lock
+  }
+}
+
+function detectLockfile(opts = {}) {
   let packageDir = escalade('.', (dir, names) => {
     return names.indexOf('package.json') !== -1 ? dir : ''
   })
@@ -44,27 +83,58 @@ function detectLockfile() {
   let lockfilePnpm = join(packageDir, 'pnpm-lock.yaml')
   let lockfileBun = join(packageDir, 'bun.lock')
   let lockfileBunBinary = join(packageDir, 'bun.lockb')
-
-  if (existsSync(lockfilePnpm)) {
-    return { file: lockfilePnpm, mode: 'pnpm' }
-  } else if (existsSync(lockfileBun) || existsSync(lockfileBunBinary)) {
-    return { file: lockfileBun, mode: 'bun' }
-  } else if (existsSync(lockfileNpm)) {
-    return { file: lockfileNpm, mode: 'npm' }
-  } else if (existsSync(lockfileYarn)) {
-    let lock = { file: lockfileYarn, mode: 'yarn' }
-    lock.content = readFileSync(lock.file).toString()
-    lock.version = /# yarn lockfile v1/.test(lock.content) ? 1 : 2
-    return lock
-  } else if (existsSync(lockfileShrinkwrap)) {
-    return { file: lockfileShrinkwrap, mode: 'npm' }
+  let files = {
+    bun: lockfileBun,
+    bunBinary: lockfileBunBinary,
+    npm: lockfileNpm,
+    pnpm: lockfilePnpm,
+    shrinkwrap: lockfileShrinkwrap,
+    yarn: lockfileYarn
   }
+
+  let packageManager = getPackageManagerOverride(opts)
+  if (packageManager) {
+    let lock = getLockfile(packageManager, files)
+    if (lock) return lock
+
+    throw new BrowserslistUpdateError(
+      'No ' + packageManager + ' lockfile found for package manager override'
+    )
+  }
+
+  let detected = ['pnpm', 'bun', 'npm', 'yarn'].find(mode => {
+    return getLockfile(mode, files)
+  })
+  if (detected) {
+    return getLockfile(detected, files)
+  }
+
   throw new BrowserslistUpdateError(
     'No lockfile found. Run "npm install", "yarn install" or "pnpm install"'
   )
 }
 
+function checkPackageManager(lock) {
+  if (lock.mode === 'bun') {
+    try {
+      execSync('bun --version', { stdio: 'ignore' })
+    } catch {
+      throw new BrowserslistUpdateError(
+        'Detected bun lockfile at ' +
+          lock.file +
+          ', but `bun` was not found in PATH.\n' +
+          'Install Bun, remove the Bun lockfile if it is stale, ' +
+          'or set `' +
+          packageManagerEnv +
+          '` to npm, yarn, or pnpm.'
+      )
+    }
+  }
+}
+
 function getLatestInfo(lock) {
+  checkPackageManager(lock)
+
   if (lock.mode === 'yarn') {
     if (lock.version === 1) {
       return JSON.parse(
@@ -256,12 +326,24 @@ function updatePackageManually(print, lock, latest) {
   execSync(del + ' caniuse-lite baseline-browser-mapping')
 }
 
-function updateWith(print, cmd) {
+function updateWith(print, cmd, lock) {
   print('Updating caniuse-lite version\n' + pico.yellow('$ ' + cmd) + '\n')
   try {
     execSync(cmd)
   } catch (e) /* c8 ignore start */ {
     print(pico.red(e.stdout.toString()))
+    if (lock && lock.mode === 'bun') {
+      print(
+        pico.red(
+          '\nDetected bun lockfile at ' +
+            lock.file +
+            '. Install Bun, remove the Bun lockfile if it is stale, ' +
+            'or set `' +
+            packageManagerEnv +
+            '` to npm, yarn, or pnpm.\n'
+        )
+      )
+    }
     print(
       pico.red(
         '\n' +
@@ -277,8 +359,8 @@ function updateWith(print, cmd) {
   } /* c8 ignore end */
 }
 
-module.exports = function updateDB(print = defaultPrint) {
-  let lock = detectLockfile()
+module.exports = function updateDB(print = defaultPrint, opts = {}) {
+  let lock = detectLockfile(opts)
   let latest = getLatestInfo(lock)
 
   let listError
@@ -294,16 +376,17 @@ module.exports = function updateDB(print = defaultPrint) {
   if (lock.mode === 'yarn' && lock.version !== 1) {
     updateWith(
       print,
-      yarnCommand + ' up -R caniuse-lite baseline-browser-mapping'
+      yarnCommand + ' up -R caniuse-lite baseline-browser-mapping',
+      lock
     )
   } else if (lock.mode === 'pnpm') {
     let lockContent = readFileSync(lock.file).toString()
     let packages = lockContent.includes('baseline-browser-mapping')
       ? 'caniuse-lite baseline-browser-mapping'
       : 'caniuse-lite'
-    updateWith(print, 'pnpm up --depth=Infinity --no-save ' + packages)
+    updateWith(print, 'pnpm up --depth=Infinity --no-save ' + packages, lock)
   } else if (lock.mode === 'bun') {
-    updateWith(print, 'bun update caniuse-lite baseline-browser-mapping')
+    updateWith(print, 'bun update caniuse-lite baseline-browser-mapping', lock)
   } else {
     updatePackageManually(print, lock, latest)
   }

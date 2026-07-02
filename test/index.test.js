@@ -1,4 +1,4 @@
-let { copy, ensureDir, readFile, remove } = require('fs-extra')
+let { copy, ensureDir, readFile, remove, writeFile } = require('fs-extra')
 let { nanoid } = require('nanoid/non-secure')
 let { execSync } = require('node:child_process')
 let { tmpdir } = require('node:os')
@@ -61,6 +61,39 @@ function runUpdate() {
     out += str.replace(/\x1b\[\d+m/g, '')
   })
   return out
+}
+
+function hidePath(callback) {
+  let paths = {}
+  for (let name of Object.keys(process.env)) {
+    if (name.toLowerCase() === 'path') {
+      paths[name] = process.env[name]
+      delete process.env[name]
+    }
+  }
+  process.env.PATH = ''
+
+  try {
+    callback()
+  } finally {
+    delete process.env.PATH
+    Object.assign(process.env, paths)
+  }
+}
+
+function setEnv(name, value, callback) {
+  let previous = process.env[name]
+  process.env[name] = value
+
+  try {
+    callback()
+  } finally {
+    if (previous === undefined) {
+      delete process.env[name]
+    } else {
+      process.env[name] = previous
+    }
+  }
 }
 
 function checkRunUpdateContents(installedVersions, system) {
@@ -286,6 +319,41 @@ test('updates caniuse-lite for pnpm', async () => {
     lock.includes(`/caniuse-lite/${caniuse.version}:`) ||
       lock.includes(`caniuse-lite@${caniuse.version}:`)
   )
+})
+
+test('throws clear error when detected bun is not available', async () => {
+  let dir = await chdir('update-bun', 'package.json', 'bun.lockb')
+  let error
+
+  hidePath(() => {
+    try {
+      runUpdate()
+    } catch (e) {
+      error = e
+    }
+  })
+
+  ok(error)
+  equal(error.name, 'BrowserslistUpdateError')
+  match(
+    error.message,
+    'Detected bun lockfile at ' +
+      join(dir, 'bun.lockb') +
+      ', but `bun` was not found in PATH.'
+  )
+  match(error.message, 'set `UPDATE_BROWSERSLIST_DB_PM` to npm, yarn, or pnpm')
+})
+
+test('uses package manager override before bun lockfile', async () => {
+  let dir = await chdir('update-npm', 'package.json', 'package-lock.json')
+  await writeFile(join(dir, 'bun.lockb'), '')
+
+  setEnv('UPDATE_BROWSERSLIST_DB_PM', 'npm', () => {
+    checkRunUpdateContents('1.0.30001030', 'npm')
+  })
+
+  let lock = JSON.parse(await readFile(join(dir, 'package-lock.json')))
+  equal(lock.dependencies['caniuse-lite'].version, caniuse.version)
 })
 
 if (bunInstalled) {

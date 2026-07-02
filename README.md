@@ -13,6 +13,14 @@ from `caniuse-lite`.
 npx update-browserslist-db@latest
 ```
 
+To override lockfile auto-detection, pass a package manager explicitly:
+
+```sh
+npx update-browserslist-db@latest --package-manager npm
+```
+
+You can also set `UPDATE_BROWSERSLIST_DB_PM=npm`.
+
 Or if using `pnpm`:
 
 ```sh
