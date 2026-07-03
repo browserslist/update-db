@@ -23,15 +23,19 @@ function isArg(arg) {
   return args.some(i => i === arg)
 }
 
+function getArgValue(arg) {
+  let index = args.indexOf(arg)
+  if (index === -1) return
+  return args[index + 1]
+}
+
 function error(msg) {
   process.stderr.write('update-browserslist-db: ' + msg + '\n')
   process.exit(1)
 }
 
-let packageManagerIndex = args.indexOf('--package-manager')
-let packageManager
-if (packageManagerIndex !== -1) {
-  packageManager = args[packageManagerIndex + 1]
+let packageManager = getArgValue('--package-manager')
+if (isArg('--package-manager')) {
   if (!packageManager || packageManager.startsWith('-')) {
     error('Missing value for --package-manager')
   }

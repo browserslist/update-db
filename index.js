@@ -22,7 +22,6 @@ BrowserslistUpdateError.prototype = Error.prototype
 // Check if HADOOP_HOME is set to determine if this is running in a Hadoop environment
 const IsHadoopExists = !!process.env.HADOOP_HOME
 const yarnCommand = IsHadoopExists ? 'yarnpkg' : 'yarn'
-const packageManagerEnv = 'UPDATE_BROWSERSLIST_DB_PM'
 
 /* c8 ignore next 3 */
 function defaultPrint(str) {
@@ -30,7 +29,8 @@ function defaultPrint(str) {
 }
 
 function getPackageManagerOverride(opts) {
-  let packageManager = opts.packageManager || process.env[packageManagerEnv]
+  let packageManager =
+    opts.packageManager || process.env.UPDATE_BROWSERSLIST_DB_PM
 
   if (packageManager) {
     if (!PACKAGE_MANAGERS.includes(packageManager)) {
@@ -115,20 +115,29 @@ function detectLockfile(opts = {}) {
 }
 
 function checkPackageManager(lock) {
-  if (lock.mode === 'bun') {
-    try {
-      execSync('bun --version', { stdio: 'ignore' })
-    } catch {
-      throw new BrowserslistUpdateError(
-        'Detected bun lockfile at ' +
-          lock.file +
-          ', but `bun` was not found in PATH.\n' +
-          'Install Bun, remove the Bun lockfile if it is stale, ' +
-          'or set `' +
-          packageManagerEnv +
-          '` to npm, yarn, or pnpm.'
-      )
-    }
+  let command = lock.mode === 'yarn' ? yarnCommand : lock.mode
+  try {
+    execSync(command + ' --version', { stdio: 'ignore' })
+  } catch {
+    throw new BrowserslistUpdateError(
+      'Detected ' +
+        lock.mode +
+        ' lockfile at ' +
+        lock.file +
+        ', but `' +
+        command +
+        '` was not found in PATH.\n' +
+        'Install ' +
+        lock.mode +
+        ', remove the ' +
+        lock.mode +
+        ' lockfile if it is stale, ' +
+        'or set `' +
+        'UPDATE_BROWSERSLIST_DB_PM' +
+        '` to ' +
+        PACKAGE_MANAGERS.filter(i => i !== lock.mode).join(', ') +
+        '.'
+    )
   }
 }
 
@@ -332,15 +341,19 @@ function updateWith(print, cmd, lock) {
     execSync(cmd)
   } catch (e) /* c8 ignore start */ {
     print(pico.red(e.stdout.toString()))
-    if (lock && lock.mode === 'bun') {
+    if (lock) {
       print(
         pico.red(
-          '\nDetected bun lockfile at ' +
+          '\nDetected ' +
+            lock.mode +
+            ' lockfile at ' +
             lock.file +
-            '. Install Bun, remove the Bun lockfile if it is stale, ' +
+            '. If this lockfile is stale, remove it, ' +
             'or set `' +
-            packageManagerEnv +
-            '` to npm, yarn, or pnpm.\n'
+            'UPDATE_BROWSERSLIST_DB_PM' +
+            '` to ' +
+            PACKAGE_MANAGERS.filter(i => i !== lock.mode).join(', ') +
+            '.\n'
         )
       )
     }
