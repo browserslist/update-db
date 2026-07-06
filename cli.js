@@ -26,7 +26,11 @@ function isArg(arg) {
 function getArgValue(arg) {
   let index = args.indexOf(arg)
   if (index === -1) return
-  return args[index + 1]
+  let value = args[index + 1]
+  if (!value || value.startsWith('-')) {
+    error('Missing value for ' + arg)
+  }
+  return value
 }
 
 function error(msg) {
@@ -35,11 +39,6 @@ function error(msg) {
 }
 
 let packageManager = getArgValue('--package-manager')
-if (isArg('--package-manager')) {
-  if (!packageManager || packageManager.startsWith('-')) {
-    error('Missing value for --package-manager')
-  }
-}
 
 if (isArg('--help') || isArg('-h')) {
   process.stdout.write(getPackage().description + '.\n\n' + USAGE + '\n')

@@ -8,6 +8,15 @@ const { detectEOL, detectIndent } = require('./utils')
 
 const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm', 'bun']
 
+function listPackageManagers(packageManagers) {
+  if (packageManagers.length === 1) return packageManagers[0]
+  return (
+    packageManagers.slice(0, -1).join(', ') +
+    ', or ' +
+    packageManagers[packageManagers.length - 1]
+  )
+}
+
 function BrowserslistUpdateError(message) {
   this.name = 'BrowserslistUpdateError'
   this.message = message
@@ -35,30 +44,38 @@ function getPackageManagerOverride(opts) {
   if (packageManager) {
     if (!PACKAGE_MANAGERS.includes(packageManager)) {
       throw new BrowserslistUpdateError(
-        'Package manager must be one of: ' + PACKAGE_MANAGERS.join(', ')
+        'Package manager must be one of: ' +
+          listPackageManagers(PACKAGE_MANAGERS)
       )
     }
     return packageManager
   }
 }
 
-function getLockfile(mode, files) {
-  if (mode === 'pnpm' && existsSync(files.pnpm)) {
-    return { file: files.pnpm, mode: 'pnpm' }
+function getLockfile(mode, packageDir) {
+  let lockfileNpm = join(packageDir, 'package-lock.json')
+  let lockfileShrinkwrap = join(packageDir, 'npm-shrinkwrap.json')
+  let lockfileYarn = join(packageDir, 'yarn.lock')
+  let lockfilePnpm = join(packageDir, 'pnpm-lock.yaml')
+  let lockfileBun = join(packageDir, 'bun.lock')
+  let lockfileBunBinary = join(packageDir, 'bun.lockb')
+
+  if (mode === 'pnpm' && existsSync(lockfilePnpm)) {
+    return { file: lockfilePnpm, mode: 'pnpm' }
   } else if (mode === 'bun') {
-    if (existsSync(files.bun)) {
-      return { file: files.bun, mode: 'bun' }
-    } else if (existsSync(files.bunBinary)) {
-      return { file: files.bunBinary, mode: 'bun' }
+    if (existsSync(lockfileBun)) {
+      return { file: lockfileBun, mode: 'bun' }
+    } else if (existsSync(lockfileBunBinary)) {
+      return { file: lockfileBunBinary, mode: 'bun' }
     }
   } else if (mode === 'npm') {
-    if (existsSync(files.npm)) {
-      return { file: files.npm, mode: 'npm' }
-    } else if (existsSync(files.shrinkwrap)) {
-      return { file: files.shrinkwrap, mode: 'npm' }
+    if (existsSync(lockfileNpm)) {
+      return { file: lockfileNpm, mode: 'npm' }
+    } else if (existsSync(lockfileShrinkwrap)) {
+      return { file: lockfileShrinkwrap, mode: 'npm' }
     }
-  } else if (mode === 'yarn' && existsSync(files.yarn)) {
-    let lock = { file: files.yarn, mode: 'yarn' }
+  } else if (mode === 'yarn' && existsSync(lockfileYarn)) {
+    let lock = { file: lockfileYarn, mode: 'yarn' }
     lock.content = readFileSync(lock.file).toString()
     lock.version = /# yarn lockfile v1/.test(lock.content) ? 1 : 2
     return lock
@@ -77,24 +94,9 @@ function detectLockfile(opts = {}) {
     )
   }
 
-  let lockfileNpm = join(packageDir, 'package-lock.json')
-  let lockfileShrinkwrap = join(packageDir, 'npm-shrinkwrap.json')
-  let lockfileYarn = join(packageDir, 'yarn.lock')
-  let lockfilePnpm = join(packageDir, 'pnpm-lock.yaml')
-  let lockfileBun = join(packageDir, 'bun.lock')
-  let lockfileBunBinary = join(packageDir, 'bun.lockb')
-  let files = {
-    bun: lockfileBun,
-    bunBinary: lockfileBunBinary,
-    npm: lockfileNpm,
-    pnpm: lockfilePnpm,
-    shrinkwrap: lockfileShrinkwrap,
-    yarn: lockfileYarn
-  }
-
   let packageManager = getPackageManagerOverride(opts)
   if (packageManager) {
-    let lock = getLockfile(packageManager, files)
+    let lock = getLockfile(packageManager, packageDir)
     if (lock) return lock
 
     throw new BrowserslistUpdateError(
@@ -102,11 +104,11 @@ function detectLockfile(opts = {}) {
     )
   }
 
-  let detected = ['pnpm', 'bun', 'npm', 'yarn'].find(mode => {
-    return getLockfile(mode, files)
-  })
-  if (detected) {
-    return getLockfile(detected, files)
+  for (let mode of ['pnpm', 'bun', 'npm', 'yarn']) {
+    let lock = getLockfile(mode, packageDir)
+    if (lock) {
+      return lock
+    }
   }
 
   throw new BrowserslistUpdateError(
@@ -135,7 +137,7 @@ function checkPackageManager(lock) {
         'or set `' +
         'UPDATE_BROWSERSLIST_DB_PM' +
         '` to ' +
-        PACKAGE_MANAGERS.filter(i => i !== lock.mode).join(', ') +
+        listPackageManagers(PACKAGE_MANAGERS.filter(i => i !== lock.mode)) +
         '.'
     )
   }
@@ -352,7 +354,9 @@ function updateWith(print, cmd, lock) {
             'or set `' +
             'UPDATE_BROWSERSLIST_DB_PM' +
             '` to ' +
-            PACKAGE_MANAGERS.filter(i => i !== lock.mode).join(', ') +
+            listPackageManagers(
+              PACKAGE_MANAGERS.filter(i => i !== lock.mode)
+            ) +
             '.\n'
         )
       )
