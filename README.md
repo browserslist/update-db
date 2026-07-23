@@ -31,10 +31,11 @@ Or if using `yarn` 2+:
 yarn dlx update-browserslist-db@latest
 ```
 
-<a href="https://evilmartians.com/?utm_source=update-browserslist-db">
-  <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
-       alt="Sponsored by Evil Martians" width="236" height="54">
-</a>
+---
+
+<img src="https://cdn.evilmartians.com/badges/logo-no-label.svg" alt="" width="22" height="16" />  Update Browserslist DB is built by <b><a href="https://evilmartians.com/">Evil Martians</a></b>, an American design and engineering consultancy for <b>developer tools, AI, and cybersecurity startups</b>.
+
+---
 
 ## Why you need to call it regularly
 
