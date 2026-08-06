@@ -34,6 +34,17 @@ try {
   bunInstalled = false
 }
 
+let denoInstalled
+try {
+  execSync('deno --version 2>/dev/null')
+  denoInstalled = true
+} catch {
+  process.stderr.write(
+    pico.yellow('Deno is not installed. Skipping Deno tests\n')
+  )
+  denoInstalled = false
+}
+
 let testDir
 test.after.each(async () => {
   process.chdir(__dirname)
@@ -70,15 +81,15 @@ function checkRunUpdateContents(installedVersions, system) {
   match(
     runUpdate(),
     `Latest version:     ${caniuse.version}\n` +
-      'Installed version' +
-      (installedVersions.indexOf(',') !== -1 ? 's:' : ': ') +
-      ` ${installedVersions}\n` +
-      'Removing old caniuse-lite from lock file\n' +
-      'Installing new caniuse-lite version\n' +
-      `$ ${addCmd} caniuse-lite baseline-browser-mapping\n` +
-      'Cleaning package.json dependencies from caniuse-lite\n' +
-      `$ ${rmCmd} caniuse-lite baseline-browser-mapping\n` +
-      'caniuse-lite has been successfully updated\n'
+    'Installed version' +
+    (installedVersions.indexOf(',') !== -1 ? 's:' : ': ') +
+    ` ${installedVersions}\n` +
+    'Removing old caniuse-lite from lock file\n' +
+    'Installing new caniuse-lite version\n' +
+    `$ ${addCmd} caniuse-lite baseline-browser-mapping\n` +
+    'Cleaning package.json dependencies from caniuse-lite\n' +
+    `$ ${rmCmd} caniuse-lite baseline-browser-mapping\n` +
+    'caniuse-lite has been successfully updated\n'
   )
 }
 
@@ -86,8 +97,8 @@ function checkRunUpdateNoChanges() {
   match(
     runUpdate(),
     `Latest version:     ${caniuse.version}\n` +
-      `Installed version:  ${caniuse.version}\n` +
-      'caniuse-lite is up to date\n'
+    `Installed version:  ${caniuse.version}\n` +
+    'caniuse-lite is up to date\n'
   )
 }
 
@@ -120,7 +131,7 @@ test('throws on missing package.json', async () => {
   throws(
     runUpdate,
     'Cannot find package.json. ' +
-      'Is this the right directory to run `npx update-browserslist-db` in?'
+    'Is this the right directory to run `npx update-browserslist-db` in?'
   )
 })
 
@@ -158,7 +169,7 @@ test("shows an error when browsers list can't be retrieved", async () => {
   match(
     runUpdate(),
     'Problem with browser list retrieval.\n' +
-      'Target browser changes won’t be shown.\n'
+    'Target browser changes won’t be shown.\n'
   )
 
   let lock = JSON.parse(await readFile(join(dir, 'package-lock.json')))
@@ -261,9 +272,9 @@ if (yarnInstalled) {
       match(
         runUpdate(),
         `Latest version:     ${caniuse.version}\n` +
-          'Updating caniuse-lite version\n' +
-          '$ yarn up -R caniuse-lite baseline-browser-mapping\n' +
-          'caniuse-lite has been successfully updated\n'
+        'Updating caniuse-lite version\n' +
+        '$ yarn up -R caniuse-lite baseline-browser-mapping\n' +
+        'caniuse-lite has been successfully updated\n'
       )
       checkYarnLockfile(dir, 2)
       execSync(YARN_CMD + ' set version classic')
@@ -276,15 +287,15 @@ test('updates caniuse-lite for pnpm', async () => {
   match(
     runUpdate(),
     `Latest version:     ${caniuse.version}\n` +
-      'Updating caniuse-lite version\n' +
-      '$ pnpm up --depth=Infinity --no-save caniuse-lite\n' +
-      'caniuse-lite has been successfully updated\n'
+    'Updating caniuse-lite version\n' +
+    '$ pnpm up --depth=Infinity --no-save caniuse-lite\n' +
+    'caniuse-lite has been successfully updated\n'
   )
 
   let lock = (await readFile(join(dir, 'pnpm-lock.yaml'))).toString()
   ok(
     lock.includes(`/caniuse-lite/${caniuse.version}:`) ||
-      lock.includes(`caniuse-lite@${caniuse.version}:`)
+    lock.includes(`caniuse-lite@${caniuse.version}:`)
   )
 })
 
@@ -294,15 +305,32 @@ if (bunInstalled) {
     match(
       runUpdate(),
       `Latest version:     ${caniuse.version}\n` +
-        'Updating caniuse-lite version\n' +
-        '$ bun update caniuse-lite baseline-browser-mapping\n' +
-        'caniuse-lite has been successfully updated\n'
+      'Updating caniuse-lite version\n' +
+      '$ bun update caniuse-lite baseline-browser-mapping\n' +
+      'caniuse-lite has been successfully updated\n'
     )
 
     let dependencies = execSync('bun pm ls --all', {
       env: { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1' }
     }).toString()
     ok(dependencies.includes(`caniuse-lite@${caniuse.version}`))
+  })
+}
+
+if (denoInstalled) {
+  test('updates caniuse-lite for deno', async () => {
+    let dir = await chdir('update-deno', 'package.json', 'deno.lock')
+    match(
+      runUpdate(),
+      `Latest version:     ${caniuse.version}\n` +
+      'Updating caniuse-lite version\n' +
+      '$ deno update caniuse-lite baseline-browser-mapping\n' +
+      'caniuse-lite has been successfully updated\n'
+    )
+
+    let lock = JSON.parse(await readFile(join(dir, 'deno.lock')))
+    let key = Object.keys(lock.npm).find(k => k.startsWith('caniuse-lite@'))
+    ok(key.endsWith(caniuse.version))
   })
 }
 

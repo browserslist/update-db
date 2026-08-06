@@ -34,7 +34,7 @@ function detectLockfile() {
   if (!packageDir) {
     throw new BrowserslistUpdateError(
       'Cannot find package.json. ' +
-        'Is this the right directory to run `npx update-browserslist-db` in?'
+      'Is this the right directory to run `npx update-browserslist-db` in?'
     )
   }
 
@@ -44,6 +44,7 @@ function detectLockfile() {
   let lockfilePnpm = join(packageDir, 'pnpm-lock.yaml')
   let lockfileBun = join(packageDir, 'bun.lock')
   let lockfileBunBinary = join(packageDir, 'bun.lockb')
+  let lockfileDeno = join(packageDir, 'deno.lock')
 
   if (existsSync(lockfilePnpm)) {
     return { file: lockfilePnpm, mode: 'pnpm' }
@@ -58,9 +59,11 @@ function detectLockfile() {
     return lock
   } else if (existsSync(lockfileShrinkwrap)) {
     return { file: lockfileShrinkwrap, mode: 'npm' }
+  } else if (existsSync(lockfileDeno)) {
+    return { file: lockfileDeno, mode: 'deno' }
   }
   throw new BrowserslistUpdateError(
-    'No lockfile found. Run "npm install", "yarn install" or "pnpm install"'
+    'No lockfile found. Run "npm install", "yarn install", "pnpm install", "bun install" or "deno install"'
   )
 }
 
@@ -81,6 +84,12 @@ function getLatestInfo(lock) {
   }
   if (lock.mode === 'bun') {
     return JSON.parse(execSync(' bun info caniuse-lite --json').toString())
+  }
+  if (lock.mode === 'deno') {
+    let result = JSON.parse(
+      execSync('deno x -y npm:npm show caniuse-lite version --json').toString()
+    )
+    return { version: Array.isArray(result) ? result[0] : result }
   }
 
   return JSON.parse(execSync('npm show caniuse-lite --json').toString())
@@ -168,9 +177,9 @@ function updateYarnLockfile(lock, latest) {
         if (lines.length === 4) {
           lines[3] = latest.dist.integrity
             ? lines[3].replace(
-                /integrity .+/,
-                'integrity ' + latest.dist.integrity
-              )
+              /integrity .+/,
+              'integrity ' + latest.dist.integrity
+            )
             : ''
         }
       }
@@ -202,10 +211,10 @@ function updatePackageManually(print, lock, latest) {
   if (caniuseVersions.length === 1 && caniuseVersions[0] === latest.version) {
     print(
       'Installed version:  ' +
-        pico.bold(pico.green(caniuseVersions[0])) +
-        '\n' +
-        pico.bold(pico.green('caniuse-lite is up to date')) +
-        '\n'
+      pico.bold(pico.green(caniuseVersions[0])) +
+      '\n' +
+      pico.bold(pico.green('caniuse-lite is up to date')) +
+      '\n'
     )
     return
   }
@@ -215,10 +224,10 @@ function updatePackageManually(print, lock, latest) {
   }
   print(
     'Installed version' +
-      (caniuseVersions.length === 1 ? ':  ' : 's: ') +
-      pico.bold(pico.red(caniuseVersions.join(', '))) +
-      '\n' +
-      'Removing old caniuse-lite from lock file\n'
+    (caniuseVersions.length === 1 ? ':  ' : 's: ') +
+    pico.bold(pico.red(caniuseVersions.join(', '))) +
+    '\n' +
+    'Removing old caniuse-lite from lock file\n'
   )
   writeFileSync(lock.file, lockfileData.content)
 
@@ -226,8 +235,8 @@ function updatePackageManually(print, lock, latest) {
     lock.mode === 'yarn' ? yarnCommand + ' add -W' : lock.mode + ' install'
   print(
     'Installing new caniuse-lite version\n' +
-      pico.yellow('$ ' + install + ' caniuse-lite baseline-browser-mapping') +
-      '\n'
+    pico.yellow('$ ' + install + ' caniuse-lite baseline-browser-mapping') +
+    '\n'
   )
   try {
     execSync(install + ' caniuse-lite baseline-browser-mapping')
@@ -235,12 +244,12 @@ function updatePackageManually(print, lock, latest) {
     print(
       pico.red(
         '\n' +
-          e.stack +
-          '\n\n' +
-          'Problem with `' +
-          install +
-          ' caniuse-lite` call. ' +
-          'Run it manually.\n'
+        e.stack +
+        '\n\n' +
+        'Problem with `' +
+        install +
+        ' caniuse-lite` call. ' +
+        'Run it manually.\n'
       )
     )
     process.exit(1)
@@ -250,8 +259,8 @@ function updatePackageManually(print, lock, latest) {
     lock.mode === 'yarn' ? yarnCommand + ' remove -W' : lock.mode + ' uninstall'
   print(
     'Cleaning package.json dependencies from caniuse-lite\n' +
-      pico.yellow('$ ' + del + ' caniuse-lite baseline-browser-mapping') +
-      '\n'
+    pico.yellow('$ ' + del + ' caniuse-lite baseline-browser-mapping') +
+    '\n'
   )
   execSync(del + ' caniuse-lite baseline-browser-mapping')
 }
@@ -265,12 +274,12 @@ function updateWith(print, cmd) {
     print(
       pico.red(
         '\n' +
-          e.stack +
-          '\n\n' +
-          'Problem with `' +
-          cmd +
-          '` call. ' +
-          'Run it manually.\n'
+        e.stack +
+        '\n\n' +
+        'Problem with `' +
+        cmd +
+        '` call. ' +
+        'Run it manually.\n'
       )
     )
     process.exit(1)
@@ -304,6 +313,9 @@ module.exports = function updateDB(print = defaultPrint) {
     updateWith(print, 'pnpm up --depth=Infinity --no-save ' + packages)
   } else if (lock.mode === 'bun') {
     updateWith(print, 'bun update caniuse-lite baseline-browser-mapping')
+  } else if (lock.mode === 'deno') {
+    updateWith(print, 'deno add npm:caniuse-lite npm:baseline-browser-mapping')
+    updateWith(print, 'deno remove caniuse-lite baseline-browser-mapping')
   } else {
     updatePackageManually(print, lock, latest)
   }
@@ -324,14 +336,14 @@ module.exports = function updateDB(print = defaultPrint) {
       print(
         pico.gray(
           'Install `browserslist` to your direct dependencies ' +
-            'to see target browser changes\n'
+          'to see target browser changes\n'
         )
       )
     } else {
       print(
         pico.gray(
           'Problem with browser list retrieval.\n' +
-            'Target browser changes won’t be shown.\n'
+          'Target browser changes won’t be shown.\n'
         )
       )
     }
