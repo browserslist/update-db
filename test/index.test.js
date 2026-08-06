@@ -335,7 +335,7 @@ if (denoInstalled) {
       `Latest version:     ${caniuse.version}\n` +
         'Updating caniuse-lite version\n' +
         '$ deno add npm:caniuse-lite npm:baseline-browser-mapping\n' +
-        'Updating caniuse-lite version\n' +
+        'Cleaning package.json dependencies from caniuse-lite\n' +
         '$ deno remove caniuse-lite baseline-browser-mapping\n' +
         'caniuse-lite has been successfully updated\n'
     )

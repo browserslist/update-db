@@ -264,8 +264,8 @@ function updatePackageManually(print, lock, latest) {
   execSync(del + ' caniuse-lite baseline-browser-mapping')
 }
 
-function updateWith(print, cmd) {
-  print('Updating caniuse-lite version\n' + pico.yellow('$ ' + cmd) + '\n')
+function updateWith(print, cmd, message = 'Updating caniuse-lite version') {
+  print(message + '\n' + pico.yellow('$ ' + cmd) + '\n')
   try {
     execSync(cmd)
   } catch (e) /* c8 ignore start */ {
@@ -311,7 +311,11 @@ module.exports = function updateDB(print = defaultPrint) {
     updateWith(print, 'bun update caniuse-lite baseline-browser-mapping')
   } else if (lock.mode === 'deno') {
     updateWith(print, 'deno add npm:caniuse-lite npm:baseline-browser-mapping')
-    updateWith(print, 'deno remove caniuse-lite baseline-browser-mapping')
+    updateWith(
+      print,
+      'deno remove caniuse-lite baseline-browser-mapping',
+      'Cleaning package.json dependencies from caniuse-lite'
+    )
   } else {
     updatePackageManually(print, lock, latest)
   }
