@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.0
+
+- Added Deno support (by @ReduxFlakes).
+
 ## 1.2.3
 
 - Fixed bun support (by @cehenriques).
