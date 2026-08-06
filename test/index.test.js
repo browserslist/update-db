@@ -269,6 +269,11 @@ if (yarnInstalled) {
     test('updates caniuse-lite for yarn v2', async () => {
       let dir = await chdir('update-yarn-v2', 'package.json', 'yarn.lock')
       execSync('yarn set version berry')
+
+      // Without it Yarn will skip caniuse-lite releases younger than
+      // npmMinimalAgeGate, while `yarn npm info` still reports them as the latest
+      execSync(YARN_CMD + ' config set npmMinimalAgeGate 0')
+
       match(
         runUpdate(),
         `Latest version:     ${caniuse.version}\n` +
