@@ -1,6 +1,6 @@
-let { copy, ensureDir, readFile, remove } = require('fs-extra')
-let { nanoid } = require('nanoid/non-secure')
 let { execSync } = require('node:child_process')
+let { randomUUID } = require('node:crypto')
+let { copyFile, mkdir, readFile, rm, writeFile } = require('node:fs/promises')
 let { tmpdir } = require('node:os')
 let { join } = require('node:path')
 let pico = require('picocolors')
@@ -48,17 +48,17 @@ try {
 let testDir
 test.after.each(async () => {
   process.chdir(__dirname)
-  await remove(testDir)
+  await rm(testDir, { force: true, recursive: true })
 })
 
 async function chdir(fixture, ...files) {
-  testDir = join(tmpdir(), `browserslist-${fixture}-${nanoid()}`)
-  await ensureDir(testDir)
+  testDir = join(tmpdir(), `browserslist-${fixture}-${randomUUID()}`)
+  await mkdir(testDir, { recursive: true })
 
   let from = join(__dirname, 'fixtures', fixture)
   await Promise.all(
     files.map(async i => {
-      await copy(join(from, i), join(testDir, i))
+      await copyFile(join(from, i), join(testDir, i))
     })
   )
 
@@ -284,6 +284,11 @@ if (yarnInstalled) {
 
 test('updates caniuse-lite for pnpm', async () => {
   let dir = await chdir('update-pnpm', 'package.json', 'pnpm-lock.yaml')
+
+  // Without it pnpm will skip caniuse-lite releases younger than
+  // minimumReleaseAge, while `pnpm info` still reports them as the latest
+  await writeFile(join(dir, 'pnpm-workspace.yaml'), 'minimumReleaseAge: 0\n')
+
   match(
     runUpdate(),
     `Latest version:     ${caniuse.version}\n` +
