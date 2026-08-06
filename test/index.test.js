@@ -330,6 +330,11 @@ if (bunInstalled) {
 if (denoInstalled) {
   test('updates caniuse-lite for deno', async () => {
     let dir = await chdir('update-deno', 'package.json', 'deno.lock')
+
+    // Without it Deno will skip caniuse-lite releases younger than
+    // minimumDependencyAge, while `npm show` still reports them as the latest
+    await writeFile(join(dir, 'deno.json'), '{ "minimumDependencyAge": "0" }\n')
+
     match(
       runUpdate(),
       `Latest version:     ${caniuse.version}\n` +
