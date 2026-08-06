@@ -27,9 +27,6 @@ importers:
       c8:
         specifier: ^10.1.3
         version: 10.1.3
-      clean-publish:
-        specifier: ^6.0.1
-        version: 6.0.1
       eslint-plugin-prefer-let:
         specifier: ^4.2.2
         version: 4.2.2
@@ -443,11 +440,6 @@ packages:
   caniuse-lite@1.0.30001760:
     resolution: {integrity: sha512-7AAMPcueWELt1p3mi13HR/LHH0TJLT11cnwDJEs3xA4+CK/PLKeO9Kl1oru24htkyUKtkGCvAx4ohB0Ttry8Dw==}
 
-  clean-publish@6.0.1:
-    resolution: {integrity: sha512-fDHKQgcGRb/KmmwobfRtLdGm/cWJY3OBGzwZHxTcotb2+AhK0LXMK4oOxqB8lUV5Km6DbciuUwsKdI/qY9uwjw==}
-    engines: {node: '>= 20.0.0'}
-    hasBin: true
-
   cliui@8.0.1:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
     engines: {node: '>=12'}
@@ -596,10 +588,6 @@ packages:
   kleur@4.1.5:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
-
-  lilconfig@3.1.3:
-    resolution: {integrity: sha512-/vlFKAoH5Cgt3Ie+JLhRbwOsCQePABiU3tJ1egGvyQ+33R/vcwM2Zl2QR/LzjsBeItPt3oSVXapn+m4nQDvpzw==}
-    engines: {node: '>=14'}
 
   locate-path@6.0.0:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
@@ -768,10 +756,6 @@ packages:
 
   test-exclude@7.0.1:
     resolution: {integrity: sha512-pFYqmTw68LXVjeWJMST4+borgQP2AyMNbg1BpZh9LbyhUeNkeaPF9gzfPGUAnSMV3qPYdWUwDIjjCLiSDOl7vg==}
-    engines: {node: '>=18'}
-
-  tinyexec@1.0.2:
-    resolution: {integrity: sha512-W/KYk+NFhkmsYpuHq5JykngiOCnxeVL8v8dFnqxSD8qEEdRfXk1SDM6JzNqcERbcGYj9tMrDQBYV9cjgnunFIg==}
     engines: {node: '>=18'}
 
   tinyglobby@0.2.15:
@@ -1106,13 +1090,6 @@ snapshots:
 
   caniuse-lite@1.0.30001760: {}
 
-  clean-publish@6.0.1:
-    dependencies:
-      lilconfig: 3.1.3
-      picomatch: 4.0.3
-      tinyexec: 1.0.2
-      tinyglobby: 0.2.15
-
   cliui@8.0.1:
     dependencies:
       string-width: 4.2.3
@@ -1252,8 +1229,6 @@ snapshots:
       graceful-fs: 4.2.11
 
   kleur@4.1.5: {}
-
-  lilconfig@3.1.3: {}
 
   locate-path@6.0.0:
     dependencies:
@@ -1412,8 +1387,6 @@ snapshots:
       '@istanbuljs/schema': 0.1.3
       glob: 10.5.0
       minimatch: 9.0.5
-
-  tinyexec@1.0.2: {}
 
   tinyglobby@0.2.15:
     dependencies:
