@@ -1,80 +1,107 @@
 # Change Log
+
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 1.2.3
-* Fixed bun support (by @cehenriques).
+
+- Fixed bun support (by @cehenriques).
 
 ## 1.2.2
-* Fixed update on `depth` in pnpm config.
+
+- Fixed update on `depth` in pnpm config.
 
 ## 1.2.1
-* Fixed `ERR_PNPM_NO_PACKAGE_IN_DEPENDENCIES` error on pnpm.
+
+- Fixed `ERR_PNPM_NO_PACKAGE_IN_DEPENDENCIES` error on pnpm.
 
 ## 1.2.0
-* Added Baseline data updating too.
+
+- Added Baseline data updating too.
 
 ## 1.1.4
-* Fixed `package.json` changes on `pnpm` update.
+
+- Fixed `package.json` changes on `pnpm` update.
 
 ## 1.1.3
-* Fixed Bun support.
+
+- Fixed Bun support.
 
 ## 1.1.2
-* Use less aggressive message on browsers diff error.
+
+- Use less aggressive message on browsers diff error.
 
 ## 1.1.1
-* Fixed types.
+
+- Fixed types.
 
 ## 1.1.0
-* Added Bun support (by @pornoiya and @kytta).
+
+- Added Bun support (by @pornoiya and @kytta).
 
 ## 1.0.16
-* Fixed old Node.js support.
+
+- Fixed old Node.js support.
 
 ## 1.0.15
-* Fixed warning on missed `browserslist` in direct dependencies.
+
+- Fixed warning on missed `browserslist` in direct dependencies.
 
 ## 1.0.14
-* Another way to fix yarn and Hadoop CLI conflict (by Al Amin Ahamed).
+
+- Another way to fix yarn and Hadoop CLI conflict (by Al Amin Ahamed).
 
 ## 1.0.13
-* Fixed warning text.
+
+- Fixed warning text.
 
 ## 1.0.12
-* Fixed yarn support when system has Hadoop CLI.
+
+- Fixed yarn support when system has Hadoop CLI.
 
 ## 1.0.11
-* Fixed npm lockfile 3 support.
+
+- Fixed npm lockfile 3 support.
 
 ## 1.0.10
-* Fixed pnpm support (by Joris Masson).
+
+- Fixed pnpm support (by Joris Masson).
 
 ## 1.0.9
-* Fixed EOL detection (by Maxim Mazurok).
+
+- Fixed EOL detection (by Maxim Mazurok).
 
 ## 1.0.8
-* Fixed indent detection on Windows (by Maxim Mazurok).
+
+- Fixed indent detection on Windows (by Maxim Mazurok).
 
 ## 1.0.7
-* Fixed indent detection.
+
+- Fixed indent detection.
 
 ## 1.0.6
-* Fixed indent changes for npm 6 (by Alexander Anchishkin).
+
+- Fixed indent changes for npm 6 (by Alexander Anchishkin).
 
 ## 1.0.5
-* Fixed npm 6 support.
+
+- Fixed npm 6 support.
 
 ## 1.0.4
-* Fixed browsers changes detection.
+
+- Fixed browsers changes detection.
 
 ## 1.0.3
-* Added Browserslist to peer dependencies.
+
+- Added Browserslist to peer dependencies.
 
 ## 1.0.2
-* Fixed browsers changes detection.
+
+- Fixed browsers changes detection.
 
 ## 1.0.1
-* Fix
+
+- Fix
 
 ## 1.0
-* Initial release.
+
+- Initial release.

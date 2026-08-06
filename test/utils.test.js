@@ -1,17 +1,17 @@
 let { suite } = require('uvu')
 let { equal } = require('uvu/assert')
 
-const {
+let {
   DEFAULT_EOL,
   DEFAULT_INDENT,
   detectEOL,
   detectIndent
 } = require('../utils')
 
-const detectIndentSuite = suite('detectIndent')
+let detectIndentSuite = suite('detectIndent')
 
-const lineEndings = ['\n', '\r', '\r\n']
-const indentationStyles = ['  ', '    ', '\t']
+let lineEndings = ['\n', '\r', '\r\n']
+let indentationStyles = ['  ', '    ', '\t']
 
 lineEndings.forEach(lineEnding =>
   indentationStyles.forEach(indentationStyle =>
@@ -39,7 +39,7 @@ detectIndentSuite(
 
 detectIndentSuite.run()
 
-const detectEOLSuite = suite('detectEOL')
+let detectEOLSuite = suite('detectEOL')
 
 lineEndings.forEach(lineEnding =>
   detectEOLSuite(

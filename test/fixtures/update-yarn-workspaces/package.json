@@ -1,13 +1,13 @@
 {
-  "license": "MIT",
   "private": true,
-  "devDependencies": {
-    "qs": "^6.6.0",
-    "autoprefixer": "^9.7.4",
-    "postcss-preset-env": "^6.7.0"
-  },
+  "license": "MIT",
   "workspaces": [
     "workspace-one",
     "workspace-two"
-  ]
+  ],
+  "devDependencies": {
+    "autoprefixer": "^9.7.4",
+    "postcss-preset-env": "^6.7.0",
+    "qs": "^6.6.0"
+  }
 }

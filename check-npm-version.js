@@ -9,11 +9,11 @@ if (!existsSync('deno.lock')) {
       process.stderr.write(
         pico.red(
           'Update npm or call ' +
-          pico.yellow('npx browserslist@latest --update-db') +
-          '\n'
+            pico.yellow('npx browserslist@latest --update-db') +
+            '\n'
         )
       )
       process.exit(1)
     }
-  } catch { }
+  } catch {}
 }

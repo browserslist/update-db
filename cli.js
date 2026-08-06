@@ -14,7 +14,7 @@ function getPackage() {
 
 let args = process.argv.slice(2)
 
-let USAGE = 'Usage:\n  npx update-browserslist-db\n'
+const USAGE = 'Usage:\n  npx update-browserslist-db\n'
 
 function isArg(arg) {
   return args.some(i => i === arg)
