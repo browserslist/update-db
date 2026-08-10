@@ -311,19 +311,37 @@ test('updates caniuse-lite for pnpm', async () => {
 
 if (bunInstalled) {
   test('updates caniuse-lite for bun', async () => {
-    await chdir('update-bun', 'package.json', 'bun.lockb')
+    let dir = await chdir('update-bun', 'package.json', 'bun.lockb')
+    let pkgBefore = (await readFile(join(dir, 'package.json'))).toString()
+
     match(
       runUpdate(),
       `Latest version:     ${caniuse.version}\n` +
         'Updating caniuse-lite version\n' +
-        '$ bun update caniuse-lite baseline-browser-mapping\n' +
+        '$ bun install (with a temporary caniuse-lite override)\n' +
+        'Removing the temporary override\n' +
+        '$ bun install\n' +
         'caniuse-lite has been successfully updated\n'
     )
 
     let dependencies = execSync('bun pm ls --all', {
       env: { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1' }
     }).toString()
-    ok(dependencies.includes(`caniuse-lite@${caniuse.version}`))
+    let versions = [...dependencies.matchAll(/caniuse-lite@(\S+)/g)].map(
+      i => i[1]
+    )
+
+    // Every copy has to move, including the nested ones. `bun update
+    // caniuse-lite` only ever added a new hoisted copy at the latest version
+    // and left those behind on the old one.
+    ok(versions.length > 0)
+    equal(
+      versions.filter(i => i !== caniuse.version),
+      []
+    )
+
+    // The override is temporary and must not survive in package.json.
+    equal((await readFile(join(dir, 'package.json'))).toString(), pkgBefore)
   })
 }
 

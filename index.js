@@ -1,7 +1,7 @@
 let { execSync } = require('child_process')
 let escalade = require('escalade/sync')
 let { existsSync, readFileSync, writeFileSync } = require('fs')
-let { join } = require('path')
+let { dirname, join } = require('path')
 let pico = require('picocolors')
 
 let { detectEOL, detectIndent } = require('./utils')
@@ -264,6 +264,55 @@ function updatePackageManually(print, lock, latest) {
   execSync(del + ' caniuse-lite baseline-browser-mapping')
 }
 
+/**
+ * Bun cannot update a transitive dependency by name: `bun update caniuse-lite`
+ * adds caniuse-lite to package.json as a new direct dependency at the latest
+ * version and leaves every nested copy - the ones that actually get resolved at
+ * runtime - on the old version. A temporary `overrides` entry reaches those,
+ * and the resolutions survive once it is taken back out.
+ */
+function updateBun(print, lock, latest) {
+  let pkgFile = join(dirname(lock.file), 'package.json')
+  let original = readFileSync(pkgFile)
+  let pkg = JSON.parse(original.toString())
+  let withOverride = {
+    ...pkg,
+    overrides: {
+      ...pkg.overrides,
+      'baseline-browser-mapping': 'latest',
+      'caniuse-lite': latest.version
+    }
+  }
+
+  // The file is restored byte for byte below, so its formatting does not matter.
+  writeFileSync(pkgFile, JSON.stringify(withOverride, null, 2) + '\n')
+
+  print(
+    'Updating caniuse-lite version\n' +
+      pico.yellow('$ bun install') +
+      ' (with a temporary caniuse-lite override)\n'
+  )
+  try {
+    execSync('bun install')
+  } catch (e) /* c8 ignore start */ {
+    writeFileSync(pkgFile, original)
+    print(pico.red(e.stdout.toString()))
+    print(
+      pico.red(
+        '\n' +
+          e.stack +
+          '\n\n' +
+          'Problem with `bun install` call. ' +
+          'Run it manually.\n'
+      )
+    )
+    process.exit(1)
+  } /* c8 ignore end */
+
+  writeFileSync(pkgFile, original)
+  updateWith(print, 'bun install', 'Removing the temporary override')
+}
+
 function updateWith(print, cmd, message = 'Updating caniuse-lite version') {
   print(message + '\n' + pico.yellow('$ ' + cmd) + '\n')
   try {
@@ -308,7 +357,7 @@ module.exports = function updateDB(print = defaultPrint) {
       : 'caniuse-lite'
     updateWith(print, 'pnpm up --depth=Infinity --no-save ' + packages)
   } else if (lock.mode === 'bun') {
-    updateWith(print, 'bun update caniuse-lite baseline-browser-mapping')
+    updateBun(print, lock, latest)
   } else if (lock.mode === 'deno') {
     updateWith(print, 'deno add npm:caniuse-lite npm:baseline-browser-mapping')
     updateWith(
