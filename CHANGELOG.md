@@ -2,6 +2,15 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.2
+
+- Fixed `--version` output (by @keshavagr025).
+- Fixed npm version detection (by @keshavagr025).
+- Fixed Bun support (by @keshavagr025).
+- Fixed Deno support on new Deno versions (by @keshavagr025).
+- Fixed error message on missing package manager (by @keshavagr025).
+- Fixed pnpm 12 support.
+
 ## 1.3.1
 
 - Fixed Bun support (by @LabinatorSolutions).
