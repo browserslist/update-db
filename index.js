@@ -87,7 +87,9 @@ function getLatestInfo(lock) {
     }
     if (lock.mode === 'deno') {
       let result = JSON.parse(
-        execSync('deno run -A npm:npm show caniuse-lite version --json').toString()
+        execSync(
+          'deno run -A npm:npm show caniuse-lite version --json'
+        ).toString()
       )
       return { version: Array.isArray(result) ? result[0] : result }
     }
@@ -96,7 +98,11 @@ function getLatestInfo(lock) {
   } catch (e) {
     if (e.code === 'ENOENT' || e.status === 127) {
       throw new BrowserslistUpdateError(
-        'Cannot find ' + lock.mode + ' binary in PATH. Please install ' + lock.mode + ' or run updates manually.'
+        'Cannot find ' +
+          lock.mode +
+          ' binary in PATH. Please install ' +
+          lock.mode +
+          ' or run updates manually.'
       )
     }
     throw e
@@ -364,7 +370,7 @@ module.exports = function updateDB(print = defaultPrint) {
     let packages = lockContent.includes('baseline-browser-mapping')
       ? 'caniuse-lite baseline-browser-mapping'
       : 'caniuse-lite'
-    updateWith(print, 'pnpm up --depth=Infinity --no-save ' + packages)
+    updateWith(print, 'pnpm up --depth=9999 --no-save ' + packages)
   } else if (lock.mode === 'bun') {
     updateBun(print, lock, latest)
   } else if (lock.mode === 'deno') {

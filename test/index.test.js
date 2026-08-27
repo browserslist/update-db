@@ -298,7 +298,8 @@ test('updates caniuse-lite for pnpm', async () => {
     runUpdate(),
     `Latest version:     ${caniuse.version}\n` +
       'Updating caniuse-lite version\n' +
-      '$ pnpm up --depth=Infinity --no-save caniuse-lite\n' +
+      '$ pnpm up --depth=9999 --no-save ' +
+      'caniuse-lite baseline-browser-mapping\n' +
       'caniuse-lite has been successfully updated\n'
   )
 
