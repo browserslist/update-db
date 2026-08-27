@@ -428,4 +428,3 @@ test('rethrows package manager errors', async () => {
 })
 
 test.run()
-
