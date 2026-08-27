@@ -383,5 +383,19 @@ test('throws error when package manager binary is missing', async () => {
   }
 })
 
+test('rethrows package manager errors', async () => {
+  let dir = await chdir('update-npm', 'package.json', 'package-lock.json')
+  let binDir = join(dir, 'bin')
+  await mkdir(binDir)
+  await writeFile(join(binDir, 'npm'), '#!/bin/sh\nexit 1\n', { mode: 0o755 })
+  let oldPath = process.env.PATH
+  try {
+    process.env.PATH = binDir + ':' + oldPath
+    throws(() => updateDb(), /Command failed/)
+  } finally {
+    process.env.PATH = oldPath
+  }
+})
+
 test.run()
 
