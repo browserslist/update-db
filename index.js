@@ -82,7 +82,7 @@ function getLatestInfo(lock) {
     return JSON.parse(execSync('pnpm info caniuse-lite --json').toString())
   }
   if (lock.mode === 'bun') {
-    return JSON.parse(execSync(' bun info caniuse-lite --json').toString())
+    return JSON.parse(execSync('bun info caniuse-lite --json').toString())
   }
   if (lock.mode === 'deno') {
     let result = JSON.parse(
