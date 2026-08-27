@@ -94,7 +94,7 @@ function getLatestInfo(lock) {
 
     return JSON.parse(execSync('npm show caniuse-lite --json').toString())
   } catch (e) {
-    if (e.code === 'ENOENT') {
+    if (e.code === 'ENOENT' || e.status === 127) {
       throw new BrowserslistUpdateError(
         'Cannot find ' + lock.mode + ' binary in PATH. Please install ' + lock.mode + ' or run updates manually.'
       )
