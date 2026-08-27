@@ -4,7 +4,8 @@ let pico = require('picocolors')
 
 if (!existsSync('deno.lock')) {
   try {
-    let version = parseInt(execSync('npm -v'))
+    let output = execSync('npm -v').toString().trim()
+    let version = parseInt(output.replace(/^[^\d]*/, ''))
     if (version <= 6) {
       process.stderr.write(
         pico.red(
