@@ -67,31 +67,40 @@ function detectLockfile() {
 }
 
 function getLatestInfo(lock) {
-  if (lock.mode === 'yarn') {
-    if (lock.version === 1) {
-      return JSON.parse(
-        execSync(YARN_CMD + ' info caniuse-lite --json').toString()
-      ).data
-    } else {
-      return JSON.parse(
-        execSync(YARN_CMD + ' npm info caniuse-lite --json').toString()
+  try {
+    if (lock.mode === 'yarn') {
+      if (lock.version === 1) {
+        return JSON.parse(
+          execSync(YARN_CMD + ' info caniuse-lite --json').toString()
+        ).data
+      } else {
+        return JSON.parse(
+          execSync(YARN_CMD + ' npm info caniuse-lite --json').toString()
+        )
+      }
+    }
+    if (lock.mode === 'pnpm') {
+      return JSON.parse(execSync('pnpm info caniuse-lite --json').toString())
+    }
+    if (lock.mode === 'bun') {
+      return JSON.parse(execSync('bun info caniuse-lite --json').toString())
+    }
+    if (lock.mode === 'deno') {
+      let result = JSON.parse(
+        execSync('deno run -A npm:npm show caniuse-lite version --json').toString()
+      )
+      return { version: Array.isArray(result) ? result[0] : result }
+    }
+
+    return JSON.parse(execSync('npm show caniuse-lite --json').toString())
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      throw new BrowserslistUpdateError(
+        'Cannot find ' + lock.mode + ' binary in PATH. Please install ' + lock.mode + ' or run updates manually.'
       )
     }
+    throw e
   }
-  if (lock.mode === 'pnpm') {
-    return JSON.parse(execSync('pnpm info caniuse-lite --json').toString())
-  }
-  if (lock.mode === 'bun') {
-    return JSON.parse(execSync(' bun info caniuse-lite --json').toString())
-  }
-  if (lock.mode === 'deno') {
-    let result = JSON.parse(
-      execSync('deno run -A npm:npm show caniuse-lite version --json').toString()
-    )
-    return { version: Array.isArray(result) ? result[0] : result }
-  }
-
-  return JSON.parse(execSync('npm show caniuse-lite --json').toString())
 }
 
 function getBrowsers() {
