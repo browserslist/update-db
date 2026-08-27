@@ -86,7 +86,7 @@ function getLatestInfo(lock) {
   }
   if (lock.mode === 'deno') {
     let result = JSON.parse(
-      execSync('deno x -y npm:npm show caniuse-lite version --json').toString()
+      execSync('deno run -A npm:npm show caniuse-lite version --json').toString()
     )
     return { version: Array.isArray(result) ? result[0] : result }
   }
