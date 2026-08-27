@@ -369,4 +369,19 @@ if (denoInstalled) {
   })
 }
 
+test('throws error when package manager binary is missing', async () => {
+  await chdir('update-bun', 'package.json', 'bun.lockb')
+  let oldPath = process.env.PATH
+  try {
+    process.env.PATH = ''
+    throws(
+      () => updateDb(),
+      /Cannot find bun binary in PATH/
+    )
+  } finally {
+    process.env.PATH = oldPath
+  }
+})
+
 test.run()
+
