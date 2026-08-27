@@ -28,7 +28,7 @@ function error(msg) {
 if (isArg('--help') || isArg('-h')) {
   process.stdout.write(getPackage().description + '.\n\n' + USAGE + '\n')
 } else if (isArg('--version') || isArg('-v')) {
-  process.stdout.write('browserslist-lint ' + getPackage().version + '\n')
+  process.stdout.write(getPackage().name + ' ' + getPackage().version + '\n')
 } else {
   try {
     updateDb()
