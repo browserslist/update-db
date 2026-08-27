@@ -45,6 +45,10 @@ try {
   denoInstalled = false
 }
 
+let pnpmMajor = Number(
+  execSync('pnpm --version').toString().trim().split('.')[0]
+)
+
 let testDir
 test.after.each(async () => {
   process.chdir(__dirname)
@@ -287,21 +291,49 @@ if (yarnInstalled) {
   }
 }
 
-test('updates caniuse-lite for pnpm', async () => {
-  let dir = await chdir('update-pnpm', 'package.json', 'pnpm-lock.yaml')
+const OLD_CANIUSE = '1.0.30001001'
 
-  // Without it pnpm will skip caniuse-lite releases younger than
-  // minimumReleaseAge, while `pnpm info` still reports them as the latest
-  await writeFile(join(dir, 'pnpm-workspace.yaml'), 'minimumReleaseAge: 0\n')
+async function writePnpmConfig(dir, pin) {
+  if (pnpmMajor >= 12) {
+    let config = 'minimumReleaseAge: 0\n'
+    if (pin) config += `overrides:\n  caniuse-lite: ${pin}\n`
+    await writeFile(join(dir, 'pnpm-workspace.yaml'), config)
+  } else {
+    await writeFile(join(dir, '.npmrc'), 'minimum-release-age=0\n')
+    let file = join(dir, 'package.json')
+    let pkg = JSON.parse((await readFile(file)).toString())
+    if (pin) {
+      pkg.pnpm = { overrides: { 'caniuse-lite': pin } }
+    } else {
+      delete pkg.pnpm
+    }
+    await writeFile(file, JSON.stringify(pkg, null, 2) + '\n')
+  }
+}
 
-  match(
-    runUpdate(),
-    `Latest version:     ${caniuse.version}\n` +
-      'Updating caniuse-lite version\n' +
-      '$ pnpm up --depth=9999 --no-save ' +
-      'caniuse-lite baseline-browser-mapping\n' +
-      'caniuse-lite has been successfully updated\n'
+async function unpinPnpmLockfile(dir, pin) {
+  let file = join(dir, 'pnpm-lock.yaml')
+  let lock = (await readFile(file)).toString()
+  await writeFile(
+    file,
+    lock.replace(`\noverrides:\n  caniuse-lite: ${pin}\n`, '')
   )
+}
+
+test('updates caniuse-lite for pnpm', async () => {
+  let dir = await chdir('update-pnpm', 'package.json')
+
+  // pnpm reads lockfiles only from a narrow range of its own versions,
+  // so generate the fixture's lockfile with the pnpm we test against
+  await writePnpmConfig(dir, OLD_CANIUSE)
+  execSync('pnpm install --lockfile-only')
+  await writePnpmConfig(dir, null)
+  await unpinPnpmLockfile(dir, OLD_CANIUSE)
+
+  let out = runUpdate()
+  match(out, `Latest version:     ${caniuse.version}\n`)
+  match(out, '$ pnpm up --depth=9999 --no-save caniuse-lite')
+  match(out, 'caniuse-lite has been successfully updated\n')
 
   let lock = (await readFile(join(dir, 'pnpm-lock.yaml'))).toString()
   ok(
@@ -375,10 +407,7 @@ test('throws error when package manager binary is missing', async () => {
   let oldPath = process.env.PATH
   try {
     process.env.PATH = ''
-    throws(
-      () => updateDb(),
-      /Cannot find bun binary in PATH/
-    )
+    throws(() => updateDb(), /Cannot find bun binary in PATH/)
   } finally {
     process.env.PATH = oldPath
   }
