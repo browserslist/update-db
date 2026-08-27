@@ -1,4 +1,4 @@
-let { execSync } = require('child_process')
+let { execFileSync } = require('child_process')
 let escalade = require('escalade/sync')
 let { existsSync, readFileSync, writeFileSync } = require('fs')
 let { dirname, join } = require('path')
@@ -71,30 +71,47 @@ function getLatestInfo(lock) {
     if (lock.mode === 'yarn') {
       if (lock.version === 1) {
         return JSON.parse(
-          execSync(YARN_CMD + ' info caniuse-lite --json').toString()
+          execFileSync(YARN_CMD, ['info', 'caniuse-lite', '--json']).toString()
         ).data
       } else {
         return JSON.parse(
-          execSync(YARN_CMD + ' npm info caniuse-lite --json').toString()
+          execFileSync(YARN_CMD, [
+            'npm',
+            'info',
+            'caniuse-lite',
+            '--json'
+          ]).toString()
         )
       }
     }
     if (lock.mode === 'pnpm') {
-      return JSON.parse(execSync('pnpm info caniuse-lite --json').toString())
+      return JSON.parse(
+        execFileSync('pnpm', ['info', 'caniuse-lite', '--json']).toString()
+      )
     }
     if (lock.mode === 'bun') {
-      return JSON.parse(execSync('bun info caniuse-lite --json').toString())
+      return JSON.parse(
+        execFileSync('bun', ['info', 'caniuse-lite', '--json']).toString()
+      )
     }
     if (lock.mode === 'deno') {
       let result = JSON.parse(
-        execSync(
-          'deno run -A npm:npm show caniuse-lite version --json'
-        ).toString()
+        execFileSync('deno', [
+          'run',
+          '-A',
+          'npm:npm',
+          'show',
+          'caniuse-lite',
+          'version',
+          '--json'
+        ]).toString()
       )
       return { version: Array.isArray(result) ? result[0] : result }
     }
 
-    return JSON.parse(execSync('npm show caniuse-lite --json').toString())
+    return JSON.parse(
+      execFileSync('npm', ['show', 'caniuse-lite', '--json']).toString()
+    )
   } catch (e) {
     if (e.code === 'ENOENT' || e.status === 127) {
       throw new BrowserslistUpdateError(
@@ -252,8 +269,12 @@ function updatePackageManually(print, lock, latest) {
       pico.yellow('$ ' + install + ' caniuse-lite baseline-browser-mapping') +
       '\n'
   )
+  let installParts = install.split(' ')
   try {
-    execSync(install + ' caniuse-lite baseline-browser-mapping')
+    execFileSync(
+      installParts[0],
+      installParts.slice(1).concat(['caniuse-lite', 'baseline-browser-mapping'])
+    )
   } catch (e) /* c8 ignore start */ {
     print(
       pico.red(
@@ -276,7 +297,11 @@ function updatePackageManually(print, lock, latest) {
       pico.yellow('$ ' + del + ' caniuse-lite baseline-browser-mapping') +
       '\n'
   )
-  execSync(del + ' caniuse-lite baseline-browser-mapping')
+  let delParts = del.split(' ')
+  execFileSync(
+    delParts[0],
+    delParts.slice(1).concat(['caniuse-lite', 'baseline-browser-mapping'])
+  )
 }
 
 /**
@@ -308,7 +333,7 @@ function updateBun(print, lock, latest) {
       ' (with a temporary caniuse-lite override)\n'
   )
   try {
-    execSync('bun install')
+    execFileSync('bun', ['install'])
   } catch (e) /* c8 ignore start */ {
     writeFileSync(pkgFile, original)
     print(pico.red(e.stdout.toString()))
@@ -330,8 +355,9 @@ function updateBun(print, lock, latest) {
 
 function updateWith(print, cmd, message = 'Updating caniuse-lite version') {
   print(message + '\n' + pico.yellow('$ ' + cmd) + '\n')
+  let cmdParts = cmd.split(' ')
   try {
-    execSync(cmd)
+    execFileSync(cmdParts[0], cmdParts.slice(1))
   } catch (e) /* c8 ignore start */ {
     print(pico.red(e.stdout.toString()))
     print(
