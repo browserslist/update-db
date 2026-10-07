@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.3.4
+
+- Fixed new `pnpm` `minimumReleaseAge` compatibility issue (by @Banner-Keith).
+- Fixed Windows support (by @Banner-Keith).
+
 ## 1.3.3
 
 - Fixed `pnpm` `minimumReleaseAge` compatibility.
