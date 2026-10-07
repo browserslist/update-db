@@ -70,6 +70,16 @@ function getLatestInfo(lock) {
   try {
     if (lock.mode === 'yarn') {
       if (lock.version === 1) {
+        let yarnMajorVersion = getYarnMajor()
+        // If someone has yarn 2 or above they would get an opaque error.
+        // Instead we will explicitly tell them they need to use classic.
+        if (yarnMajorVersion !== 1) {
+          throw new BrowserslistUpdateError(
+            'This project has a Yarn v1 (classic) lockfile, but the installed ' +
+              `Yarn is Berry v${yarnMajorVersion}. Install and activate Yarn classic ` +
+              'to update caniuse-lite.'
+          )
+        }
         return JSON.parse(
           execSync(YARN_CMD + ' info caniuse-lite --json').toString()
         ).data
@@ -96,7 +106,21 @@ function getLatestInfo(lock) {
 
     return JSON.parse(execSync('npm show caniuse-lite --json').toString())
   } catch (e) {
-    if (e.code === 'ENOENT' || e.status === 127) {
+    // ENOENT / status 127 are the POSIX "command not found" signals. cmd.exe
+    // instead reports `'<binary>' is not recognized as an internal or external
+    // command`. Anchor that phrase to the binary we actually launched so an
+    // unrelated "is not recognized" line in a real failure's output (e.g. a
+    // nested tool) is not mistaken for a missing package manager.
+    // Only yarn's binary differs from lock.mode (it may be `yarnpkg`).
+    let binary = lock.mode === 'yarn' ? YARN_CMD : lock.mode
+    let missingOnWindows = new RegExp(
+      "'" + binary + "' is not recognized as an internal or external command"
+    )
+    if (
+      e.code === 'ENOENT' ||
+      e.status === 127 ||
+      missingOnWindows.test(commandErrorText(e))
+    ) {
       throw new BrowserslistUpdateError(
         'Cannot find ' +
           lock.mode +
@@ -107,6 +131,13 @@ function getLatestInfo(lock) {
     }
     throw e
   }
+}
+
+// Read the major version of the installed Yarn. A missing binary throws here
+// and is handled by getLatestInfo's catch as the usual "not in PATH" message.
+function getYarnMajor() {
+  let version = execSync(YARN_CMD + ' --version').toString().trim()
+  return Number(version.split('.')[0])
 }
 
 function getBrowsers() {
@@ -171,7 +202,13 @@ function deletePackage(node, metadata) {
 let yarnVersionRe = /version "(.*?)"/
 
 function updateYarnLockfile(lock, latest) {
-  let blocks = lock.content.split(/(\n{2,})/).map(block => {
+  // Split entries on blank lines using LF. A CRLF lockfile has `\r\n\r\n`
+  // between entries, which `\n{2,}` cannot match, so the whole file would
+  // collapse into one block and no version be detected. CRLF can occur on any
+  // OS (git autocrlf, editor settings), so normalize regardless of platform;
+  // updateLockfile restores the original EOL on the returned content.
+  let normalized = lock.content.replace(/\r\n/g, '\n')
+  let blocks = normalized.split(/(\n{2,})/).map(block => {
     return block.split('\n')
   })
   let versions = {}
@@ -335,8 +372,39 @@ function commandErrorText(error) {
     .join('\n')
 }
 
+// Windows shell only function
+function quotePnpmArg(arg) {
+  // cmd.exe expands %VAR% and !VAR! even inside double quotes, and there is no
+  // reliable way to escape them on the command line. Refuse rather than run a
+  // mangled command; in practice our args (flags and JSON overrides) never
+  // contain them.
+  if (/[%!]/.test(arg)) {
+    throw new BrowserslistUpdateError(
+      'Cannot safely pass "%" or "!" to pnpm on Windows: ' + arg
+    )
+  }
+  if (!/[\s"]/.test(arg)) return arg
+  // Escape embedded quotes (doubling any backslash run that precedes them) and
+  // double a trailing backslash run so it cannot escape the closing quote.
+  return '"' + arg.replace(/(\\*)"/g, '$1$1\\"').replace(/(\\+)$/, '$1$1') + '"'
+}
+
+function runPnpm(args, options = {}) {
+  // Node on Windows cannot launch pnpm's `.cmd` shim without a shell
+  if (process.platform === 'win32') {
+    // Shell requires arguments to be quoted
+    return execFileSync('pnpm', args.map(quotePnpmArg), {
+      ...options,
+      shell: true
+    })
+  }
+
+  // On other platforms pnpm is spawned directly.
+  return execFileSync('pnpm', args, options)
+}
+
 function getPnpmConfig(name) {
-  let output = execFileSync('pnpm', [
+  let output = runPnpm([
     'config',
     'get',
     name,
@@ -349,7 +417,7 @@ function getPnpmPackageTimes(name) {
   let times
   try {
     times = JSON.parse(
-      execFileSync('pnpm', ['info', name, 'time', '--json']).toString()
+      runPnpm(['info', name, 'time', '--json']).toString()
     )
   } catch (error) /* c8 ignore start */ {
     throw new BrowserslistUpdateError(
@@ -438,6 +506,10 @@ function updatePnpmStrict(print, lock, packages) {
     ? readFileSync(workspaceFile)
     : undefined
   let originalLockfile = readFileSync(lock.file)
+  let packageFile = join(packageDir, 'package.json')
+  let originalPackage = existsSync(packageFile)
+    ? readFileSync(packageFile)
+    : undefined
   let command = 'pnpm config set overrides'
 
   print(
@@ -452,8 +524,7 @@ function updatePnpmStrict(print, lock, packages) {
   )
 
   try {
-    execFileSync(
-      'pnpm',
+    runPnpm(
       [
         'config',
         'set',
@@ -472,7 +543,7 @@ function updatePnpmStrict(print, lock, packages) {
         pico.yellow('$ ' + command) +
         ' (with temporary policy-compliant overrides)\n'
     )
-    execFileSync('pnpm', ['install', '--lockfile-only'], { cwd: packageDir })
+    runPnpm(['install', '--lockfile-only'], { cwd: packageDir })
 
     restoreFile(workspaceFile, originalWorkspace)
     // The lockfile no longer matches the restored overrides, and pnpm
@@ -481,11 +552,12 @@ function updatePnpmStrict(print, lock, packages) {
     print(
       'Removing temporary pnpm overrides\n' + pico.yellow('$ ' + command) + '\n'
     )
-    execFileSync('pnpm', ['install', '--no-frozen-lockfile'], {
+    runPnpm(['install', '--no-frozen-lockfile'], {
       cwd: packageDir
     })
   } catch (error) /* c8 ignore start */ {
     restoreFile(workspaceFile, originalWorkspace)
+    restoreFile(packageFile, originalPackage)
     writeFileSync(lock.file, originalLockfile)
     print(pico.red(commandErrorText(error)))
     print(
@@ -504,12 +576,22 @@ function updatePnpm(print, lock) {
 
   print('Updating caniuse-lite version\n' + pico.yellow('$ ' + command) + '\n')
   try {
-    execFileSync('pnpm', ['up', '--depth=9999', '--no-save', ...packages], {
+    runPnpm(['up', '--depth=9999', '--no-save', ...packages], {
       stdio: 'pipe'
     })
   } catch (error) /* c8 ignore start */ {
     let text = commandErrorText(error)
-    if (text.includes('ERR_PNPM_STRICT_MIN_RELEASE_AGE_REQUIRES_SAVE')) {
+    // pnpm versions before 12.4.2 can fail `up --no-save` under strict
+    // minimumReleaseAge. The error differs by version: 10 uses
+    // NO_MATURE_MATCHING_VERSION, 11 uses MINIMUM_RELEASE_AGE_VIOLATION, and
+    // 12.0–12.4.1 uses STRICT_MIN_RELEASE_AGE_REQUIRES_SAVE. In each case,
+    // resolve and pin the newest mature versions ourselves. pnpm 12.4.2+ does
+    // this natively and succeeds before reaching this catch.
+    if (
+      text.includes('ERR_PNPM_STRICT_MIN_RELEASE_AGE_REQUIRES_SAVE') ||
+      text.includes('ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION') ||
+      text.includes('ERR_PNPM_NO_MATURE_MATCHING_VERSION')
+    ) {
       updatePnpmStrict(print, lock, packages)
     } else {
       print(pico.red(text))

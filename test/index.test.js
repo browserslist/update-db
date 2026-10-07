@@ -2,7 +2,7 @@ let { execSync } = require('node:child_process')
 let { randomUUID } = require('node:crypto')
 let { copyFile, mkdir, readFile, rm, writeFile } = require('node:fs/promises')
 let { tmpdir } = require('node:os')
-let { join } = require('node:path')
+let { delimiter, join } = require('node:path')
 let pico = require('picocolors')
 let { test } = require('uvu')
 let { equal, match, ok, throws } = require('uvu/assert')
@@ -12,37 +12,38 @@ let updateDb = require('..')
 // Fix CLI tool name conflict between Yarn and Hadoop
 const YARN_CMD = process.env.HADOOP_HOME ? 'yarnpkg' : 'yarn'
 
-let yarnInstalled
-try {
-  execSync('yarn --version 2>/dev/null')
-  yarnInstalled = true
-} catch {
+// Return whether `command` is on PATH by probing `command --version`.
+// `stdio: 'ignore'` hides its output cross-platform;
+// a shell redirect such as `2>/dev/null` fails on Windows' cmd.exe and
+// makes an installed tool look missing.
+function isInstalled(command) {
+  try {
+    execSync(command + ' --version', { stdio: 'ignore' })
+    return true
+  } catch {
+    return false
+  }
+}
+
+let yarnInstalled = isInstalled('yarn')
+if (!yarnInstalled) {
   process.stderr.write(
     pico.yellow('Yarn is not installed. Skipping Yarn tests\n')
   )
-  yarnInstalled = false
 }
 
-let bunInstalled
-try {
-  execSync('bun --version 2>/dev/null')
-  bunInstalled = true
-} catch {
+let bunInstalled = isInstalled('bun')
+if (!bunInstalled) {
   process.stderr.write(
     pico.yellow('Bun is not installed. Skipping Bun tests\n')
   )
-  bunInstalled = false
 }
 
-let denoInstalled
-try {
-  execSync('deno --version 2>/dev/null')
-  denoInstalled = true
-} catch {
+let denoInstalled = isInstalled('deno')
+if (!denoInstalled) {
   process.stderr.write(
     pico.yellow('Deno is not installed. Skipping Deno tests\n')
   )
-  denoInstalled = false
 }
 
 let pnpmMajor = Number(
@@ -123,7 +124,11 @@ async function checkYarnLockfile(dir, version) {
     versionSyntax = `  version: ${caniuse.version}`
   }
 
-  let contents = (await readFile(join(dir, 'yarn.lock'))).toString()
+  // Yarn Berry writes yarn.lock with the OS-native EOL (CRLF on Windows), so
+  // normalize before matching the LF-based expectations.
+  let contents = (await readFile(join(dir, 'yarn.lock')))
+    .toString()
+    .replace(/\r\n/g, '\n')
   match(contents, `${yarnLockfileVersions}\n`)
   match(contents, `${yarnLockfileVersions}\n` + versionSyntax)
 }
@@ -386,20 +391,39 @@ if (pnpmMajor >= 11) {
     let out = runUpdate()
 
     match(out, `Registry latest:         ${caniuse.version}\n`)
-    match(out, 'Strict pnpm minimumReleaseAge detected\n')
-    match(out, `Latest policy-compliant: ${expected}\n`)
-    match(out, '$ pnpm install --lockfile-only (with')
-    match(out, '$ pnpm install --no-frozen-lockfile\n')
-    equal(await readFile(join(dir, 'package.json')), packageBefore)
-    equal(await readFile(join(dir, 'pnpm-workspace.yaml')), workspaceBefore)
 
-    let lock = (await readFile(join(dir, 'pnpm-lock.yaml'))).toString()
-    ok(
-      lock.includes(`/caniuse-lite/${expected}:`) ||
-        lock.includes(`caniuse-lite@${expected}:`)
-    )
-    ok(!lock.includes(`caniuse-lite/${caniuse.version}`))
-    ok(!lock.includes(`caniuse-lite@${caniuse.version}`))
+    // `pnpm up --no-save` rejects the strict age gate only in pnpm
+    // 12.0.0–12.4.1, where update-db falls back to manual overrides. Every
+    // other release (11.x, 12.4.2+) resolves the update itself, so the
+    // fallback never runs. Assert whichever path this pnpm actually took.
+    if (out.includes('Strict pnpm minimumReleaseAge detected\n')) {
+      match(out, `Latest policy-compliant: ${expected}\n`)
+      match(out, '$ pnpm install --lockfile-only (with')
+      match(out, '$ pnpm install --no-frozen-lockfile\n')
+      equal(await readFile(join(dir, 'package.json')), packageBefore)
+      equal(await readFile(join(dir, 'pnpm-workspace.yaml')), workspaceBefore)
+
+      // The fallback pins the mature version through overrides, so the
+      // lockfile lands on it exactly regardless of registry metadata
+      let lock = (await readFile(join(dir, 'pnpm-lock.yaml'))).toString()
+      ok(
+        lock.includes(`/caniuse-lite/${expected}:`) ||
+          lock.includes(`caniuse-lite@${expected}:`)
+      )
+      ok(!lock.includes(`caniuse-lite/${caniuse.version}`))
+      ok(!lock.includes(`caniuse-lite@${caniuse.version}`))
+    } else {
+      // pnpm handled the update natively, so the strict fallback must not have
+      // run. `--no-save` leaves package.json untouched. The exact resolved
+      // version depends on whether the registry served per-version publish
+      // times (pnpm#13741), so it is not asserted — but the lockfile must have
+      // moved off the old pinned version, proving an update actually happened.
+      match(out, 'caniuse-lite has been successfully updated\n')
+      ok(!out.includes('Strict pnpm minimumReleaseAge detected'))
+      equal(await readFile(join(dir, 'package.json')), packageBefore)
+      let lock = (await readFile(join(dir, 'pnpm-lock.yaml'))).toString()
+      ok(!lock.includes(OLD_CANIUSE))
+    }
   })
 
   test('fails closed when pnpm has no mature caniuse-lite version', async () => {
@@ -495,14 +519,74 @@ test('throws error when package manager binary is missing', async () => {
   }
 })
 
+// Shadow yarn on PATH with a fake that reports a Berry version, so index.js
+// hits the classic/Berry mismatch before ever running the v1-only `yarn info`.
+// Unlike the `#!/bin/sh` shims below, this one runs on Windows too: cmd.exe
+// resolves a `yarn.cmd` via PATHEXT, so the test covers the Berry branch on
+// the platform where the bug was actually reported.
+test('reports Yarn Berry on a v1 lockfile', async () => {
+  let dir = await chdir('update-yarn', 'package.json', 'yarn.lock')
+  let binDir = join(dir, 'bin')
+  await mkdir(binDir)
+  if (process.platform === 'win32') {
+    await writeFile(join(binDir, 'yarn.cmd'), '@echo 4.9.1\n')
+  } else {
+    await writeFile(join(binDir, 'yarn'), '#!/bin/sh\necho 4.9.1\n', {
+      mode: 0o755
+    })
+  }
+  let oldPath = process.env.PATH
+  try {
+    process.env.PATH = binDir + delimiter + oldPath
+    throws(() => updateDb(), /Yarn v1 \(classic\) lockfile, but .* Berry/)
+  } finally {
+    process.env.PATH = oldPath
+  }
+})
+
+// Shadow npm on PATH with a fake that exits non-zero (but is not "missing"),
+// so getLatestInfo's catch must rethrow the raw "Command failed" error rather
+// than mistake it for an absent binary. On Windows this guards the branch that
+// tells a real failure (exit 1) apart from a missing binary (exit 9009 / "is
+// not recognized"), so it runs there too via a `.cmd` shim resolved by PATHEXT.
 test('rethrows package manager errors', async () => {
   let dir = await chdir('update-npm', 'package.json', 'package-lock.json')
   let binDir = join(dir, 'bin')
   await mkdir(binDir)
-  await writeFile(join(binDir, 'npm'), '#!/bin/sh\nexit 1\n', { mode: 0o755 })
+  if (process.platform === 'win32') {
+    await writeFile(join(binDir, 'npm.cmd'), '@exit /b 1\n')
+  } else {
+    await writeFile(join(binDir, 'npm'), '#!/bin/sh\nexit 1\n', { mode: 0o755 })
+  }
   let oldPath = process.env.PATH
   try {
-    process.env.PATH = binDir + ':' + oldPath
+    process.env.PATH = binDir + delimiter + oldPath
+    throws(() => updateDb(), /Command failed/)
+  } finally {
+    process.env.PATH = oldPath
+  }
+})
+
+// A real failure whose output happens to mention that some *other* binary is
+// not recognized must still be rethrown, not swallowed as "npm is missing".
+// The classifier anchors the phrase to the binary it launched, so `'webpack'
+// is not recognized` (from a hypothetical nested call) does not match `npm`.
+test('rethrows errors that mention an unrelated missing command', async () => {
+  let dir = await chdir('update-npm', 'package.json', 'package-lock.json')
+  let binDir = join(dir, 'bin')
+  await mkdir(binDir)
+  let message =
+    "'webpack' is not recognized as an internal or external command"
+  if (process.platform === 'win32') {
+    await writeFile(join(binDir, 'npm.cmd'), '@echo ' + message + '\n@exit /b 1\n')
+  } else {
+    await writeFile(join(binDir, 'npm'), '#!/bin/sh\necho "' + message + '"\nexit 1\n', {
+      mode: 0o755
+    })
+  }
+  let oldPath = process.env.PATH
+  try {
+    process.env.PATH = binDir + delimiter + oldPath
     throws(() => updateDb(), /Command failed/)
   } finally {
     process.env.PATH = oldPath
