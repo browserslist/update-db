@@ -42,11 +42,11 @@
   },
   "devDependencies": {
     "@logux/oxc-configs": "^1.2.0",
-    "browserslist": "^4.28.9",
+    "browserslist": "^4.29.3",
     "c8": "^12.0.0",
     "eslint-plugin-prefer-let": "^4.2.2",
-    "oxlint": "^1.82.0",
-    "oxlint-tsgolint": "^7.0.2001",
+    "oxlint": "^1.87.0",
+    "oxlint-tsgolint": "^7.0.2003",
     "typescript": "^7.0.2",
     "uvu": "^0.5.6"
   },
