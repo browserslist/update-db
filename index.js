@@ -17,7 +17,6 @@ function BrowserslistUpdateError(message) {
 
 BrowserslistUpdateError.prototype = Error.prototype
 
-// Check if HADOOP_HOME is set to determine if this is running in a Hadoop environment
 const YARN_CMD = process.env.HADOOP_HOME ? 'yarnpkg' : 'yarn'
 
 /* c8 ignore next 3 */
@@ -71,8 +70,6 @@ function getLatestInfo(lock) {
     if (lock.mode === 'yarn') {
       if (lock.version === 1) {
         let yarnMajorVersion = getYarnMajor()
-        // If someone has yarn 2 or above they would get an opaque error.
-        // Instead we will explicitly tell them they need to use classic.
         if (yarnMajorVersion !== 1) {
           throw new BrowserslistUpdateError(
             'This project has a Yarn v1 (classic) lockfile, but the installed ' +
@@ -111,7 +108,6 @@ function getLatestInfo(lock) {
     // command`. Anchor that phrase to the binary we actually launched so an
     // unrelated "is not recognized" line in a real failure's output (e.g. a
     // nested tool) is not mistaken for a missing package manager.
-    // Only yarn's binary differs from lock.mode (it may be `yarnpkg`).
     let binary = lock.mode === 'yarn' ? YARN_CMD : lock.mode
     let missingOnWindows = new RegExp(
       "'" + binary + "' is not recognized as an internal or external command"
@@ -133,8 +129,6 @@ function getLatestInfo(lock) {
   }
 }
 
-// Read the major version of the installed Yarn. A missing binary throws here
-// and is handled by getLatestInfo's catch as the usual "not in PATH" message.
 function getYarnMajor() {
   let version = execSync(YARN_CMD + ' --version').toString().trim()
   return Number(version.split('.')[0])
@@ -372,15 +366,14 @@ function commandErrorText(error) {
     .join('\n')
 }
 
-// Windows shell only function
 function quotePnpmArg(arg) {
-  // cmd.exe expands %VAR% and !VAR! even inside double quotes, and there is no
-  // reliable way to escape them on the command line. Refuse rather than run a
-  // mangled command; in practice our args (flags and JSON overrides) never
-  // contain them.
-  if (/[%!]/.test(arg)) {
+  // cmd.exe expands %VAR% and !VAR! even inside double quotes. It also ignores
+  // the backslash in `\"`, so JSON values end up outside its quotes, where
+  // ^ & | < > ( ) run commands or redirect output. Refuse rather than run
+  // a mangled command.
+  if (/[%!^&|<>()]/.test(arg)) {
     throw new BrowserslistUpdateError(
-      'Cannot safely pass "%" or "!" to pnpm on Windows: ' + arg
+      'Cannot safely pass any of %!^&|<>() to pnpm on Windows: ' + arg
     )
   }
   if (!/[\s"]/.test(arg)) return arg
@@ -392,14 +385,12 @@ function quotePnpmArg(arg) {
 function runPnpm(args, options = {}) {
   // Node on Windows cannot launch pnpm's `.cmd` shim without a shell
   if (process.platform === 'win32') {
-    // Shell requires arguments to be quoted
     return execFileSync('pnpm', args.map(quotePnpmArg), {
       ...options,
       shell: true
     })
   }
 
-  // On other platforms pnpm is spawned directly.
   return execFileSync('pnpm', args, options)
 }
 
