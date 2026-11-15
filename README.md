@@ -25,6 +25,12 @@ Or if using `bun`:
 bunx update-browserslist-db@latest
 ```
 
+Or if using `aube`:
+
+```sh
+aubx update-browserslist-db@latest
+```
+
 Or if using `yarn` 2+:
 
 ```sh

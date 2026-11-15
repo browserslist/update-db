@@ -40,11 +40,14 @@ function detectLockfile() {
   let lockfileShrinkwrap = join(packageDir, 'npm-shrinkwrap.json')
   let lockfileYarn = join(packageDir, 'yarn.lock')
   let lockfilePnpm = join(packageDir, 'pnpm-lock.yaml')
+  let lockfileAube = join(packageDir, 'aube-lock.yaml')
   let lockfileBun = join(packageDir, 'bun.lock')
   let lockfileBunBinary = join(packageDir, 'bun.lockb')
   let lockfileDeno = join(packageDir, 'deno.lock')
 
-  if (existsSync(lockfilePnpm)) {
+  if (existsSync(lockfileAube)) {
+    return { file: lockfileAube, mode: 'aube' }
+  } else if (existsSync(lockfilePnpm)) {
     return { file: lockfilePnpm, mode: 'pnpm' }
   } else if (existsSync(lockfileBun) || existsSync(lockfileBunBinary)) {
     return { file: lockfileBun, mode: 'bun' }
@@ -61,7 +64,7 @@ function detectLockfile() {
     return { file: lockfileDeno, mode: 'deno' }
   }
   throw new BrowserslistUpdateError(
-    'No lockfile found. Run "npm install", "yarn install", "pnpm install", "bun install" or "deno install"'
+    'No lockfile found. Run "npm install", "yarn install", "pnpm install", "bun install", "deno install" or "aube install"'
   )
 }
 
@@ -91,6 +94,9 @@ function getLatestInfo(lock) {
     }
     if (lock.mode === 'bun') {
       return JSON.parse(execSync('bun info caniuse-lite --json').toString())
+    }
+    if (lock.mode === 'aube') {
+      return JSON.parse(execSync('aube info caniuse-lite --json').toString())
     }
     if (lock.mode === 'deno') {
       let result = JSON.parse(
@@ -558,11 +564,15 @@ function updatePnpmStrict(print, lock, packages) {
   } /* c8 ignore end */
 }
 
-function updatePnpm(print, lock) {
+function getLockedPackages(lock) {
   let lockContent = readFileSync(lock.file).toString()
-  let packages = lockContent.includes('baseline-browser-mapping')
+  return lockContent.includes('baseline-browser-mapping')
     ? ['caniuse-lite', 'baseline-browser-mapping']
     : ['caniuse-lite']
+}
+
+function updatePnpm(print, lock) {
+  let packages = getLockedPackages(lock)
   let command = 'pnpm up --depth=9999 --no-save ' + packages.join(' ')
 
   print('Updating caniuse-lite version\n' + pico.yellow('$ ' + command) + '\n')
@@ -592,6 +602,19 @@ function updatePnpm(print, lock) {
       process.exit(1)
     }
   } /* c8 ignore end */
+}
+
+/**
+ * aube ignores `--depth` and only refreshes direct dependencies, so
+ * `aube update caniuse-lite` leaves a transitive caniuse-lite where it is.
+ * Asking for `@latest` re-resolves every copy without touching package.json.
+ * aube rejects names that are not in the dependency graph, so
+ * baseline-browser-mapping is only passed when the lockfile has it.
+ * aube applies its own minimumReleaseAge to the `@latest` resolution.
+ */
+function updateAube(print, lock) {
+  let packages = getLockedPackages(lock)
+  updateWith(print, 'aube update ' + packages.map(i => i + '@latest').join(' '))
 }
 
 function updateWith(print, cmd, message = 'Updating caniuse-lite version') {
@@ -637,6 +660,8 @@ module.exports = function updateDB(print = defaultPrint) {
     updatePnpm(print, lock)
   } else if (lock.mode === 'bun') {
     updateBun(print, lock, latest)
+  } else if (lock.mode === 'aube') {
+    updateAube(print, lock)
   } else if (lock.mode === 'deno') {
     updateWith(print, 'deno add npm:caniuse-lite npm:baseline-browser-mapping')
     updateWith(
