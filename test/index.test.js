@@ -46,6 +46,13 @@ if (!denoInstalled) {
   )
 }
 
+let aubeInstalled = isInstalled('aube')
+if (!aubeInstalled) {
+  process.stderr.write(
+    pico.yellow('aube is not installed. Skipping aube tests\n')
+  )
+}
+
 let pnpmMajor = Number(
   execSync('pnpm --version').toString().trim().split('.')[0]
 )
@@ -505,6 +512,58 @@ if (denoInstalled) {
     let lock = JSON.parse(await readFile(join(dir, 'deno.lock')))
     let key = Object.keys(lock.npm).find(k => k.startsWith('caniuse-lite@'))
     ok(key.endsWith(caniuse.version))
+  })
+}
+
+if (aubeInstalled) {
+  test('updates caniuse-lite for aube', async () => {
+    let dir = await chdir('update-aube', 'package.json', 'aube-lock.yaml')
+    let packageBefore = await readFile(join(dir, 'package.json'))
+
+    // Without it aube will skip caniuse-lite releases younger than
+    // minimumReleaseAge, while `aube info` still reports them as the latest.
+    // Not 0, because then aube resolves `@latest` from its bundled metadata
+    // snapshot, which can be older than the registry.
+    await writeFile(join(dir, 'aube-workspace.yaml'), 'minimumReleaseAge: 1\n')
+
+    match(
+      runUpdate(),
+      `Registry latest:         ${caniuse.version}\n` +
+        'Updating caniuse-lite version\n' +
+        '$ aube update caniuse-lite@latest baseline-browser-mapping@latest\n' +
+        'caniuse-lite has been successfully updated\n'
+    )
+
+    // Every copy has to move, and `@latest` must not end up in package.json
+    let lock = (await readFile(join(dir, 'aube-lock.yaml'))).toString()
+    ok(lock.includes(`caniuse-lite@${caniuse.version}:`))
+    ok(!lock.includes(OLD_CANIUSE))
+    equal(await readFile(join(dir, 'package.json')), packageBefore)
+  })
+
+  test('respects aube minimumReleaseAge', async () => {
+    let dir = await chdir('update-aube', 'package.json', 'aube-lock.yaml')
+
+    // An age gate that is just too strict for the latest release. aube
+    // applies it to `@latest` itself, so the update must neither fail nor
+    // change the project config. Which version aube picks is up to aube.
+    let times = stablePublishTimes('caniuse-lite')
+    let minutes = Math.ceil((Date.now() - times[caniuse.version]) / 60000) + 1
+    await writeFile(
+      join(dir, 'aube-workspace.yaml'),
+      `minimumReleaseAge: ${minutes}\nminimumReleaseAgeStrict: true\n`
+    )
+    let packageBefore = await readFile(join(dir, 'package.json'))
+    let workspaceBefore = await readFile(join(dir, 'aube-workspace.yaml'))
+
+    let out = runUpdate()
+    match(out, `Registry latest:         ${caniuse.version}\n`)
+    match(out, 'caniuse-lite has been successfully updated\n')
+
+    let lock = (await readFile(join(dir, 'aube-lock.yaml'))).toString()
+    ok(!lock.includes(OLD_CANIUSE))
+    equal(await readFile(join(dir, 'package.json')), packageBefore)
+    equal(await readFile(join(dir, 'aube-workspace.yaml')), workspaceBefore)
   })
 }
 
