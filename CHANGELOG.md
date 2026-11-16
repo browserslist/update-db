@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.4.0
+
+- Added aube support (by @alexanderniebuhr).
+
 ## 1.3.4
 
 - Fixed new `pnpm` `minimumReleaseAge` compatibility issue (by @Banner-Keith).
